@@ -56,7 +56,7 @@ type Merger[T any] struct {
 // NewMerger returns a new Merger.
 //
 // AnyCallback parses "default" tag value and set it.
-// AnyEqual reports true if left equals right when kind of arguments are not supported (!IsSupported()).
+// AnyEqual reports true if left equals right when kind of arguments are not supported.
 // Prefix adds a prefix to "default" tag name.
 func NewMerger[T any](opt ...Option) *Merger[T] {
 	c := newDefaultConfigBuilder().Build()
@@ -71,10 +71,17 @@ func NewMerger[T any](opt ...Option) *Merger[T] {
 	}
 }
 
+// Merge values based on the 'default' tag values.
+// For each field, if the right value is not the default, use it; if not, use the left value.
+// If that is also the default, set the default value. Return this instance.
+func (m *Merger[T]) Merge(left, right T) (T, error) {
+	return m.Merger.Merge(left, right)
+}
+
 // New returns a new StructConfig.
 //
 // AnyCallback parses "default" tag value and set it.
-// Prefix adds a prefix to "default" tag name.
+// Prefix adds a prefix to "name", "default" and "usage" tag name.
 func New[T any](opt ...Option) *StructConfig[T] {
 	c := newDefaultConfigBuilder().Build()
 	c.Apply(opt...)
@@ -114,8 +121,11 @@ func (sc StructConfig[T]) FromDefault(v *T) error {
 
 // FromEnv sets environment variable values to v.
 //
-// Environment variable name will be `NewEnvVar("name tag value").String()`,
-// all '.' and '-' will be replaced with '_', making it all uppsercase.
+// Environment variable name will be
+//
+//	NewEnvVar("name tag value").String()
+//
+// All '.' and '-' will be replaced with '_', making it all uppsercase.
 func (sc StructConfig[T]) FromEnv(v *T) error {
 	r, err := internal.EnvReceptor(v, sc.anyCallback)
 	if err != nil {
