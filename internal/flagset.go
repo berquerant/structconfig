@@ -1,7 +1,12 @@
 package internal
 
+// FlagSetFunc defines a command-line flag.
 type FlagSetFunc[T any] func(name string, defaultValue T, usage string) error
 
+// SetFlag defines a flag.
+//   - name: name tag value
+//   - default value: v
+//   - usage: usage tag value
 func (f FlagSetFunc[T]) SetFlag(s StructField, v T) error {
 	if f == nil {
 		return nil
@@ -21,6 +26,7 @@ func FlagSetReceptor(typedReceptor TypedReceptor) *PairsReceptor {
 		if v, ok := s.Tag().Default(); ok {
 			return v, nil
 		}
+		// tell to pass default value when default tag value is missing
 		return "", ErrParseAsDefault
 	}
 	return PairsSynthReceptor(get, NewConv(), typedReceptor)

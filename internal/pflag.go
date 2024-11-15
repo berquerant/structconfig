@@ -6,10 +6,12 @@ import (
 	"github.com/spf13/pflag"
 )
 
+// PFlagSetReceptor returns a [Receptor] that can define the command-line flags.
 func PFlagSetReceptor(fs *pflag.FlagSet) *PairsReceptor {
 	return FlagSetReceptor(PFlagSetTypeReceptor(fs))
 }
 
+// PFlagGetReceptor returns a [Receptor] that can retrieve values from the parsed command-line flags.
 func PFlagGetReceptor(
 	ptr any,
 	fs *pflag.FlagSet,

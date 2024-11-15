@@ -5,7 +5,7 @@ import "reflect"
 // NewMerger returns a new Merger.
 //
 // anyCallback parses "default" tag value and set it.
-// anyEqual reports true if left equals right when kind of arguments are not supported (!IsSupported()).
+// anyEqual reports true if left equals right when kind of arguments are not supported.
 // prefix adds a prefix to "default" tag name.
 func NewMerger[T any](
 	anyCallback func(StructField, string, func() reflect.Value) error,

@@ -1,7 +1,9 @@
 package internal
 
+// TypedReceptorFunc accepts a pair of [StructField] and some value.
 type TypedReceptorFunc[T any] func(StructField, T) error
 
+// Call calls self if not nil.
 func (f TypedReceptorFunc[T]) Call(s StructField, v T) error {
 	if f == nil {
 		return nil
@@ -9,6 +11,7 @@ func (f TypedReceptorFunc[T]) Call(s StructField, v T) error {
 	return f(s, v)
 }
 
+// TypedReceptor accepts a pair of [StructField] and some value.
 type TypedReceptor interface {
 	Bool(StructField, bool) error
 	Int(StructField, int) error
@@ -29,6 +32,7 @@ type TypedReceptor interface {
 
 var _ TypedReceptor = &DefaultTypedReceptor{}
 
+// DefaultTypedReceptor implements [TypedReceptor].
 type DefaultTypedReceptor struct {
 	BoolFunc    TypedReceptorFunc[bool]
 	IntFunc     TypedReceptorFunc[int]

@@ -7,6 +7,12 @@ var (
 	ErrParseAsDefault = errors.New("ParseAsDefault")
 )
 
+// NewPairSynth constructs a pair of functions to process [StructField].
+//   - get: extract string from [StructField]
+//   - conv: convert the value
+//   - callback: accept the converted value
+//
+// get and conv can return [ErrParseAsDefault] or [ErrSkipParse].
 func NewPairSynth[T any](
 	get func(StructField) (string, error),
 	conv func(string) (T, error),
@@ -40,6 +46,7 @@ func NewParsePair[T any](
 	}
 }
 
+// ParsePair defines a conversion of [StructField] that can fail.
 type ParsePair[T any] struct {
 	conv     func(StructField) (T, error)
 	callback func(StructField, T) error
@@ -54,6 +61,7 @@ func (p *ParsePair[T]) Try(s StructField) error {
 
 var _ Receptor = &PairsReceptor{}
 
+// PairsReceptor is a set of [ParsePair], implements [Receptor].
 type PairsReceptor struct {
 	BoolPair    *ParsePair[bool]
 	IntPair     *ParsePair[int]
@@ -88,11 +96,14 @@ func (r PairsReceptor) Float64(f StructField) error { return r.Float64Pair.Try(f
 func (r PairsReceptor) String(f StructField) error  { return r.StringPair.Try(f) }
 func (r PairsReceptor) Any(f StructField) error     { return r.AnyPair.Try(f) }
 
+// PairsSynthReceptor synthesizes [Converter] and [TypedReceptor].
+// get extracts the value from [StructField], converter converts it and typedReceptor accepts it.
 func PairsSynthReceptor(
 	get func(StructField) (string, error),
-	c Converter,
+	converter Converter,
 	typedReceptor TypedReceptor,
 ) *PairsReceptor {
+	c := converter
 	t := typedReceptor
 
 	return &PairsReceptor{

@@ -2,6 +2,7 @@ package internal
 
 import "strconv"
 
+// Converter is a set of string conversions.
 type Converter interface {
 	Bool(s string) (bool, error)
 	Int(s string) (int, error)
@@ -19,8 +20,10 @@ type Converter interface {
 	String(s string) (string, error)
 }
 
+// ConvFunc is a function that converts string into T.
 type ConvFunc[T any] func(string) (T, error)
 
+// Call calls self if not nil, otherwise returns the default value.
 func (f ConvFunc[T]) Call(s string) (T, error) {
 	if f == nil {
 		var t T
@@ -31,6 +34,7 @@ func (f ConvFunc[T]) Call(s string) (T, error) {
 
 var _ Converter = &DefaultConverter{}
 
+// DefaultConverter implements [Converter].
 type DefaultConverter struct {
 	BoolFunc    ConvFunc[bool]
 	IntFunc     ConvFunc[int]

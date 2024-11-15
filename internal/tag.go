@@ -13,6 +13,9 @@ const (
 	TagNameIgnored = "-"
 )
 
+// NewTag returns a new [Tag].
+// [Tag] retrieves values of all [TagName], [TagUsage], [TagDefault].
+// prefix adds a prefix to the tag names.
 func NewTag(t reflect.StructTag, prefix string) *Tag {
 	return &Tag{
 		tag:    t,
@@ -20,6 +23,7 @@ func NewTag(t reflect.StructTag, prefix string) *Tag {
 	}
 }
 
+// Tag is a tag of struct.
 type Tag struct {
 	tag    reflect.StructTag
 	prefix string

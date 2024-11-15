@@ -2,10 +2,12 @@ package internal
 
 import "reflect"
 
+// Call calls the appropriate method of r for the kind of f.
 func Call(r Receptor, f StructField) error {
 	return Switch(r, f.Kind())(f)
 }
 
+// Switch chooses a method of r that corresponds to kind.
 func Switch(r Receptor, kind reflect.Kind) func(StructField) error {
 	switch kind {
 	case reflect.Bool:
