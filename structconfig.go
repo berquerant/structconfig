@@ -134,7 +134,7 @@ func (sc StructConfig[T]) FromEnv(v *T) error {
 	return sc.from(r)
 }
 
-// FromFlags set values tov from command-line flags.
+// FromFlags sets values to v from command-line flags.
 //
 // Flag name is from "name" tag value.
 func (sc StructConfig[T]) FromFlags(v *T, fs *pflag.FlagSet) error {
