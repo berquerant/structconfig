@@ -29,7 +29,7 @@ type T struct {
 os.Setenv("INT_VALUE", "10")
 sc := structconfig.New[T]()
 var got T
-if err := sc.FromDefault(&got); err != nil {
+if err := sc.FromEnv(&got); err != nil {
   panic(err)
 }
 // got.I == 10
