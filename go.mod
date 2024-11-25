@@ -7,7 +7,7 @@ require (
 	github.com/berquerant/goconfig v0.3.0
 	github.com/go-task/task/v3 v3.40.0
 	github.com/spf13/pflag v1.0.5
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
 	golang.org/x/vuln v1.1.3
 	gotest.tools/gotestsum v1.12.0
