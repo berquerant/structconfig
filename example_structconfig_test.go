@@ -33,7 +33,7 @@ func ExampleStructConfig_FromEnv() {
 	type T struct {
 		B  bool   `name:"bool_value"`
 		S  string `name:"string_value"`
-		N  int    `name:"int_value"`
+		N  int    `name:"int_value" default:"10"`
 		N2 int
 		N3 int `name:"-"`
 	}
@@ -57,7 +57,7 @@ func ExampleStructConfig_FromEnv() {
 		panic(err)
 	}
 	fmt.Println(got.B, got.S, got.N, got.N2, got.N3)
-	// Output: true str 0 0 0
+	// Output: true str 10 0 0
 }
 
 func ExampleStructConfig_FromFlags() {

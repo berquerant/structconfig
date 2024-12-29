@@ -16,7 +16,7 @@ func TestEnvReceptor(t *testing.T) {
 		I         int     `name:"ei"`
 		U         uint    `name:"eu"`
 		F         float32 `name:"ef"`
-		S         string  `name:"es"`
+		S         string  `name:"es" default:"str"`
 		NoDefault int     `name:"eno_default"`
 		Slice     []int   `name:"eslice"`
 		Ignore    []int   `name:"-"`
@@ -27,7 +27,6 @@ func TestEnvReceptor(t *testing.T) {
 		"EI": "1",
 		"EU": "10",
 		"EF": "1.1",
-		"ES": "str",
 		// ENO_DEFAULT is not defined
 		"ESLICE": "[1,2]",
 		"IGNORE": "[1]",

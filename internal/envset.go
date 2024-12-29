@@ -18,6 +18,9 @@ func EnvReceptor(
 		if v, ok := NewEnvVar(name).Get(); ok {
 			return v, nil
 		}
+		if v, ok := s.Tag().Default(); ok {
+			return v, nil
+		}
 		return "", ErrSkipParse
 	}
 
