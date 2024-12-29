@@ -9,6 +9,7 @@ const (
 	TagName    = "name"
 	TagUsage   = "usage"
 	TagDefault = "default"
+	TagShort   = "short"
 
 	TagNameIgnored = "-"
 )
@@ -42,6 +43,10 @@ func (t Tag) Usage() string {
 
 func (t Tag) Default() (string, bool) {
 	return t.tag.Lookup(t.prefix + TagDefault)
+}
+
+func (t Tag) Short() (string, bool) {
+	return t.tag.Lookup(t.prefix + TagShort)
 }
 
 func (t Tag) String() string {

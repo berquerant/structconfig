@@ -13,7 +13,7 @@ func TestTag(t *testing.T) {
 		T1 int `name:"t1"`
 		T2 int `name:"t2" usage:"t2usage"`
 		T3 int `name:"t3" default:"1"`
-		T4 int `aname:"t4"`
+		T4 int `aname:"t4" ashort:"t"`
 		T5 int
 		T6 int `name:"-"`
 	}
@@ -43,12 +43,17 @@ func TestTag(t *testing.T) {
 		dv, ok := x.Default()
 		assert.True(t, ok)
 		assert.Equal(t, "1", dv)
+		_, ok = x.Short()
+		assert.False(t, ok)
 	})
 	t.Run("T4", func(t *testing.T) {
 		x := internal.NewTag(v.Field(3).Tag, "a")
 		name, ok := x.Name()
 		assert.True(t, ok)
 		assert.Equal(t, "t4", name)
+		sv, ok := x.Short()
+		assert.True(t, ok)
+		assert.Equal(t, "t", sv)
 	})
 	t.Run("T5", func(t *testing.T) {
 		x := internal.NewTag(v.Field(4).Tag, "")

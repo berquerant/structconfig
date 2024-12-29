@@ -11,6 +11,7 @@ const (
 	TagName    = internal.TagName
 	TagUsage   = internal.TagUsage
 	TagDefault = internal.TagDefault
+	TagShort   = internal.TagShort
 )
 
 var (
@@ -81,7 +82,7 @@ func (m *Merger[T]) Merge(left, right T) (T, error) {
 // New returns a new StructConfig.
 //
 // AnyCallback parses "default" tag value and set it.
-// Prefix adds a prefix to "name", "default" and "usage" tag name.
+// Prefix adds a prefix to "name", "short", "default" and "usage" tag name.
 func New[T any](opt ...Option) *StructConfig[T] {
 	c := newDefaultConfigBuilder().Build()
 	c.Apply(opt...)
@@ -148,6 +149,7 @@ func (sc StructConfig[T]) FromFlags(v *T, fs *pflag.FlagSet) error {
 // SetFlags sets command-line flags.
 //
 // Flag name is from "name" tag value.
+// Flag shorthand is from "short" tag value.
 // Flag default value is from "default" tag value.
 // Flag usage is from "usage" tag value.
 func (sc StructConfig[T]) SetFlags(fs *pflag.FlagSet) error {

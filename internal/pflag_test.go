@@ -17,7 +17,7 @@ func TestPFlagReceptor(t *testing.T) {
 		I         int     `name:"fi" default:"1" usage:"INT"`
 		U         uint    `name:"fu" default:"10" usage:"UINT"`
 		F         float32 `name:"ff" default:"1.1" usage:"FLOAT"`
-		S         string  `name:"fs" default:"str" usage:"STRING"`
+		S         string  `name:"fs" default:"str" usage:"STRING" short:"s"`
 		NoDefault int     `name:"fnodefault"`
 		Slice     []int   `name:"fslice" default:"[1,2]"`
 		Ignore1   int
@@ -44,6 +44,19 @@ func TestPFlagReceptor(t *testing.T) {
 		args  []string
 		want  T
 	}{
+		{
+			title: "shorthand",
+			args: []string{
+				"-s", "SHORT",
+			},
+			want: T{
+				I:     1,
+				U:     10,
+				F:     1.1,
+				S:     "SHORT",
+				Slice: []int{1, 2},
+			},
+		},
 		{
 			title: "change all",
 			args: []string{

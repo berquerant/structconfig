@@ -34,9 +34,16 @@ func PFlagGetReceptor(
 	), nil
 }
 
-func pflagSetFunc[T any](f func(string, T, string) *T) TypedReceptorFunc[T] {
+func pflagSetFunc[T any](
+	f func(string, T, string) *T,
+	g func(string, string, T, string) *T,
+) TypedReceptorFunc[T] {
 	return func(s StructField, defaultValue T) error {
 		if name, ok := s.Tag().Name(); ok {
+			if short, ok := s.Tag().Short(); ok {
+				_ = g(name, short, defaultValue, s.Tag().Usage())
+				return nil
+			}
 			_ = f(name, defaultValue, s.Tag().Usage())
 		}
 		return nil
@@ -45,21 +52,21 @@ func pflagSetFunc[T any](f func(string, T, string) *T) TypedReceptorFunc[T] {
 
 func PFlagSetTypeReceptor(fs *pflag.FlagSet) *DefaultTypedReceptor {
 	return &DefaultTypedReceptor{
-		BoolFunc:    pflagSetFunc(fs.Bool),
-		IntFunc:     pflagSetFunc(fs.Int),
-		Int8Func:    pflagSetFunc(fs.Int8),
-		Int16Func:   pflagSetFunc(fs.Int16),
-		Int32Func:   pflagSetFunc(fs.Int32),
-		Int64Func:   pflagSetFunc(fs.Int64),
-		UintFunc:    pflagSetFunc(fs.Uint),
-		Uint8Func:   pflagSetFunc(fs.Uint8),
-		Uint16Func:  pflagSetFunc(fs.Uint16),
-		Uint32Func:  pflagSetFunc(fs.Uint32),
-		Uint64Func:  pflagSetFunc(fs.Uint64),
-		Float32Func: pflagSetFunc(fs.Float32),
-		Float64Func: pflagSetFunc(fs.Float64),
-		StringFunc:  pflagSetFunc(fs.String),
-		AnyFunc:     pflagSetFunc(fs.String),
+		BoolFunc:    pflagSetFunc(fs.Bool, fs.BoolP),
+		IntFunc:     pflagSetFunc(fs.Int, fs.IntP),
+		Int8Func:    pflagSetFunc(fs.Int8, fs.Int8P),
+		Int16Func:   pflagSetFunc(fs.Int16, fs.Int16P),
+		Int32Func:   pflagSetFunc(fs.Int32, fs.Int32P),
+		Int64Func:   pflagSetFunc(fs.Int64, fs.Int64P),
+		UintFunc:    pflagSetFunc(fs.Uint, fs.UintP),
+		Uint8Func:   pflagSetFunc(fs.Uint8, fs.Uint8P),
+		Uint16Func:  pflagSetFunc(fs.Uint16, fs.Uint16P),
+		Uint32Func:  pflagSetFunc(fs.Uint32, fs.Uint32P),
+		Uint64Func:  pflagSetFunc(fs.Uint64, fs.Uint64P),
+		Float32Func: pflagSetFunc(fs.Float32, fs.Float32P),
+		Float64Func: pflagSetFunc(fs.Float64, fs.Float64P),
+		StringFunc:  pflagSetFunc(fs.String, fs.StringP),
+		AnyFunc:     pflagSetFunc(fs.String, fs.StringP),
 	}
 }
 

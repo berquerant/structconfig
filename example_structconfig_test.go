@@ -64,6 +64,7 @@ func ExampleStructConfig_FromFlags() {
 	type T struct {
 		B       bool   `name:"bool_value" usage:"BOOL"`
 		S       string `name:"string_value" default:"str"`
+		X       bool   `name:"bool_short" short:"x"`
 		Ignore1 int
 		Ignore2 int `name:"-"`
 		V       struct {
@@ -96,7 +97,7 @@ func ExampleStructConfig_FromFlags() {
 		flagNames = append(flagNames, f.Name)
 	})
 
-	if err := fs.Parse([]string{"--bool_value", "--struct_value", "sv"}); err != nil {
+	if err := fs.Parse([]string{"--bool_value", "--struct_value", "sv", "-x"}); err != nil {
 		panic(err)
 	}
 
@@ -107,10 +108,10 @@ func ExampleStructConfig_FromFlags() {
 
 	sort.Strings(flagNames)
 	fmt.Println(strings.Join(flagNames, ","))
-	fmt.Println(got.B, got.S, got.Ignore1, got.Ignore2, got.V.S)
+	fmt.Println(got.B, got.S, got.Ignore1, got.Ignore2, got.V.S, got.X)
 	// Output:
-	// bool_value,string_value,struct_value
-	// true str 0 0 sv
+	// bool_short,bool_value,string_value,struct_value
+	// true str 0 0 sv true
 }
 
 func ExampleStructConfig_FromFlags_prefix() {
