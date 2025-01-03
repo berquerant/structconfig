@@ -70,19 +70,28 @@ func ExampleStructConfig_FromFlags() {
 		V       struct {
 			S string
 		} `name:"struct_value"`
+		Ignore3 struct {
+			S string
+		}
 	}
 
 	anyCallback := func(s structconfig.StructField, v string, fv func() reflect.Value) error {
-		if x, ok := s.Tag().Name(); !ok || x != "struct_value" {
-			// among T, only struct_value is not supported
+		name, ok := s.Tag().Name()
+		if !ok {
+			// ignore fields without name
+			return nil
+		}
+		switch name {
+		case "struct_value":
+			fv().Set(reflect.ValueOf(struct {
+				S string
+			}{
+				S: v,
+			}))
+			return nil
+		default:
 			return errors.New("unexpected tag name")
 		}
-		fv().Set(reflect.ValueOf(struct {
-			S string
-		}{
-			S: v,
-		}))
-		return nil
 	}
 
 	fs := pflag.NewFlagSet("test", pflag.ContinueOnError)
