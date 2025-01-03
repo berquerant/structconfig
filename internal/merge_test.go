@@ -14,9 +14,10 @@ func TestMerger(t *testing.T) {
 	var errSome = errors.New("Some")
 
 	type T struct {
-		I  int    `default:"1"`
-		S  string `default:"s"`
-		II []int  `default:"[1]"`
+		I      int    `name:"i" default:"1"`
+		S      string `name:"s" default:"s"`
+		II     []int  `name:"ii" default:"[1]"`
+		Ignore int
 	}
 	defaultValue := T{
 		I:  1,

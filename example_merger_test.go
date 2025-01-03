@@ -11,9 +11,10 @@ import (
 
 func ExampleMerger() {
 	type T struct {
-		I  int    `default:"1"`
-		S  string `default:"s"`
-		II []int  `default:"[1]"`
+		I                 int    `name:"i" default:"1"`
+		S                 string `name:"s" default:"s"`
+		II                []int  `name:"ii" default:"[1]"`
+		IgnoreWithoutName int
 	}
 
 	callback := func(s structconfig.StructField, v string, fv func() reflect.Value) error {

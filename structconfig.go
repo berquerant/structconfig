@@ -73,7 +73,7 @@ func NewMerger[T any](opt ...Option) *Merger[T] {
 }
 
 // Merge values based on the 'default' tag values.
-// For each field, if the right value is not the default, use it; if not, use the left value.
+// For each field with 'name' and 'default' tags, if the right value is not the default, use it; if not, use the left value.
 // If that is also the default, set the default value. Return this instance.
 func (m *Merger[T]) Merge(left, right T) (T, error) {
 	return m.Merger.Merge(left, right)

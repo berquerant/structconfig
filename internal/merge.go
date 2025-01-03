@@ -91,6 +91,11 @@ func (m Merger[T]) Merge(left, right T) (T, error) {
 	lValue, rValue := reflect.ValueOf(left), reflect.ValueOf(right)
 	vv := reflect.ValueOf(&v)
 	for _, f := range typ.Fields() {
+		if _, ok := f.Tag().Name(); !ok {
+			// ignore the field without 'name' tag
+			continue
+		}
+
 		name := f.Name()
 		fv := vv.Elem().FieldByName(name)
 
