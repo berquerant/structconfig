@@ -1,6 +1,6 @@
 package internal
 
-//go:generate go run github.com/berquerant/dataclass -type StructField -field "Name string|Kind reflect.Kind|Tag *Tag" -output structfield_dataclass_generated.go
+//go:generate go tool dataclass -type StructField -field "Name string|Kind reflect.Kind|Tag *Tag" -output structfield_dataclass_generated.go
 
 // Receptor accepts [StructField].
 type Receptor interface {
