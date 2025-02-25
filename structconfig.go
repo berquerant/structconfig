@@ -41,13 +41,14 @@ type (
 func IsSupportedKind(k reflect.Kind) bool         { return internal.IsSupportedKind(k) }
 func NewType(v any, prefix string) (*Type, error) { return internal.NewType(v, prefix) }
 
-//go:generate go tool goconfig -configOption Option -option -output structconfig_config_generated.go -field "AnyCallback AnyCallbackFunc|AnyEqual AnyEqualFunc|Prefix string"
+//go:generate go tool goconfig -configOption Option -option -output structconfig_config_generated.go -field "AnyCallback AnyCallbackFunc|AnyEqual AnyEqualFunc|Prefix string|Arguments []string"
 
 func newDefaultConfigBuilder() *ConfigBuilder {
 	return NewConfigBuilder().
 		AnyCallback(nil).
 		AnyEqual(nil).
-		Prefix("")
+		Prefix("").
+		Arguments(nil)
 }
 
 type Merger[T any] struct {
