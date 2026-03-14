@@ -18,7 +18,7 @@ func TestTag(t *testing.T) {
 		T6 int `name:"-"`
 	}
 
-	v := reflect.TypeOf(A{})
+	v := reflect.TypeFor[A]()
 
 	t.Run("T1", func(t *testing.T) {
 		x := internal.NewTag(v.Field(0).Tag, "")
