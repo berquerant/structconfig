@@ -9,6 +9,7 @@ tasks:
     deps:
       - vuln
       - vet
+      - fix
   test:
     cmds:
       - go tool gotestsum --format pkgname --format-icons hivis -- -cover -race ./...
@@ -18,6 +19,12 @@ tasks:
   vet:
     cmds:
       - go vet ./...
+  fix:
+    cmds:
+      - go fix -diff ./...
+  fix-do:
+    cmds:
+      - go fix ./...
   generate:
     # deps:
     #   - clean-generated
