@@ -41,6 +41,7 @@ func TestDefaultReceptor(t *testing.T) {
 			fv().Set(reflect.ValueOf(xs))
 			return nil
 		},
+		nil,
 	)
 	assert.Nil(t, err)
 

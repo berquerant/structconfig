@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"log/slog"
 	"reflect"
 
 	"github.com/spf13/pflag"
@@ -16,16 +17,47 @@ func PFlagGetReceptor(
 	ptr any,
 	fs *pflag.FlagSet,
 	anyCallback func(StructField, string, func() reflect.Value) error,
+	logger *slog.Logger,
 ) (*PairsReceptor, error) {
-	typedReceptor, err := SetTypedReceptor(ptr, anyCallback)
-	if err != nil {
-		return nil, err
+	type flagInfo struct {
+		flagName string
+		changed  bool
 	}
+	sources := make(map[string]flagInfo)
+
 	get := func(s StructField) (string, error) {
 		if name, ok := s.Tag().Name(); ok {
+			sources[s.Name()] = flagInfo{
+				flagName: name,
+				changed:  fs.Changed(name),
+			}
 			return name, nil
 		}
 		return "", ErrParseAsDefault
+	}
+
+	var onSet func(StructField, any)
+	if logger != nil {
+		onSet = func(s StructField, v any) {
+			info := sources[s.Name()]
+			source := "flag"
+			if !info.changed {
+				source = "flag_default"
+			}
+			logger.Debug(
+				"structconfig: set field",
+				slog.String("field", s.Name()),
+				slog.String("source", source),
+				slog.String("flag", info.flagName),
+				slog.Any("value", v),
+				slog.Bool("changed", info.changed),
+			)
+		}
+	}
+
+	typedReceptor, err := SetTypedReceptor(ptr, anyCallback, onSet)
+	if err != nil {
+		return nil, err
 	}
 	return PairsSynthReceptor(
 		get,
