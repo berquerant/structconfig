@@ -1,4 +1,3 @@
-[![Go Report Card](https://goreportcard.com/badge/github.com/berquerant/structconfig)](https://goreportcard.com/report/github.com/berquerant/structconfig)
 [![Go Reference](https://pkg.go.dev/badge/github.com/berquerant/structconfig.svg)](https://pkg.go.dev/github.com/berquerant/structconfig)
 
 # structconfig
