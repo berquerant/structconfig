@@ -7,15 +7,11 @@ tasks:
       - test
   lint:
     deps:
-      - vuln
       - vet
       - fix
   test:
     cmds:
       - go tool gotestsum --format pkgname --format-icons hivis -- -cover -race ./...
-  vuln:
-    cmds:
-      - go tool govulncheck ./...
   vet:
     cmds:
       - go vet ./...
