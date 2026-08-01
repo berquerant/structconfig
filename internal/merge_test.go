@@ -60,6 +60,7 @@ func TestMerger(t *testing.T) {
 		callback,
 		eq,
 		"",
+		nil,
 	)
 
 	for _, tc := range []struct {

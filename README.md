@@ -66,6 +66,19 @@ if err := sc.FromFlags(&got, fs); err != nil {
 // got.I == 100
 ```
 
+## Structured Logging
+
+You can pass a `*slog.Logger` to log configuration loading and merge decisions at **Debug** level:
+
+``` go
+logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
+sc := structconfig.New[T](structconfig.WithLogger(logger))
+// Logs at Debug level when values are set from default, env, or flag
+
+merger := structconfig.NewMerger[T](structconfig.WithLogger(logger))
+// Logs at Debug level when fields are merged/overridden
+```
+
 ## More examples
 
 - [Merger](example_merger_test.go)

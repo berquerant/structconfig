@@ -1,6 +1,9 @@
 package internal
 
-import "reflect"
+import (
+	"log/slog"
+	"reflect"
+)
 
 // NewMerger returns a new Merger.
 //
@@ -11,11 +14,13 @@ func NewMerger[T any](
 	anyCallback func(StructField, string, func() reflect.Value) error,
 	anyEqual func(left, right any) (bool, error),
 	prefix string,
+	logger *slog.Logger,
 ) *Merger[T] {
 	return &Merger[T]{
 		anyCallback: anyCallback,
 		anyEqual:    anyEqual,
 		prefix:      prefix,
+		logger:      logger,
 	}
 }
 
@@ -23,10 +28,11 @@ type Merger[T any] struct {
 	anyCallback func(StructField, string, func() reflect.Value) error
 	anyEqual    func(left, right any) (bool, error)
 	prefix      string
+	logger      *slog.Logger
 }
 
 func (m Merger[T]) newReceptor(ptr *T) (*PairsReceptor, error) {
-	return DefaultReceptor(ptr, m.anyCallback)
+	return DefaultReceptor(ptr, m.anyCallback, nil)
 }
 
 func (m Merger[T]) getType() (*Type, error) {
@@ -108,6 +114,14 @@ func (m Merger[T]) Merge(left, right T) (T, error) {
 			if !ok {
 				// overwrite by not default value from right
 				fv.Set(rv)
+				if m.logger != nil {
+					m.logger.Debug(
+						"structconfig: merged field",
+						slog.String("field", name),
+						slog.String("source", "right"),
+						slog.Any("value", rv.Interface()),
+					)
+				}
 				continue
 			}
 		}
@@ -120,6 +134,14 @@ func (m Merger[T]) Merge(left, right T) (T, error) {
 			if !ok {
 				// overwrite by not default value from left
 				fv.Set(lv)
+				if m.logger != nil {
+					m.logger.Debug(
+						"structconfig: merged field",
+						slog.String("field", name),
+						slog.String("source", "left"),
+						slog.Any("value", lv.Interface()),
+					)
+				}
 				continue
 			}
 		}

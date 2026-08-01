@@ -1,6 +1,7 @@
 package structconfig
 
 import (
+	"log/slog"
 	"reflect"
 
 	"github.com/berquerant/structconfig/internal"
@@ -41,14 +42,15 @@ type (
 func IsSupportedKind(k reflect.Kind) bool         { return internal.IsSupportedKind(k) }
 func NewType(v any, prefix string) (*Type, error) { return internal.NewType(v, prefix) }
 
-//go:generate go tool goconfig -configOption Option -option -output structconfig_config_generated.go -field "AnyCallback AnyCallbackFunc|AnyEqual AnyEqualFunc|Prefix string|Arguments []string"
+//go:generate go tool goconfig -configOption Option -option -output structconfig_config_generated.go -field "AnyCallback AnyCallbackFunc|AnyEqual AnyEqualFunc|Prefix string|Arguments []string|Logger *slog.Logger"
 
 func newDefaultConfigBuilder() *ConfigBuilder {
 	return NewConfigBuilder().
 		AnyCallback(nil).
 		AnyEqual(nil).
 		Prefix("").
-		Arguments(nil)
+		Arguments(nil).
+		Logger(nil)
 }
 
 type Merger[T any] struct {
@@ -60,6 +62,7 @@ type Merger[T any] struct {
 // AnyCallback parses "default" tag value and set it.
 // AnyEqual reports true if left equals right when kind of arguments are not supported.
 // Prefix adds a prefix to "default" tag name.
+// Logger enables structured logging of merge decisions.
 func NewMerger[T any](opt ...Option) *Merger[T] {
 	c := newDefaultConfigBuilder().Build()
 	c.Apply(opt...)
@@ -69,6 +72,7 @@ func NewMerger[T any](opt ...Option) *Merger[T] {
 			c.AnyCallback.Get(),
 			c.AnyEqual.Get(),
 			c.Prefix.Get(),
+			c.Logger.Get(),
 		),
 	}
 }
@@ -84,6 +88,7 @@ func (m *Merger[T]) Merge(left, right T) (T, error) {
 //
 // AnyCallback parses "default" tag value and set it.
 // Prefix adds a prefix to "name", "short", "default" and "usage" tag name.
+// Logger enables structured logging of config population.
 func New[T any](opt ...Option) *StructConfig[T] {
 	c := newDefaultConfigBuilder().Build()
 	c.Apply(opt...)
@@ -91,12 +96,14 @@ func New[T any](opt ...Option) *StructConfig[T] {
 	return &StructConfig[T]{
 		anyCallback: c.AnyCallback.Get(),
 		prefix:      c.Prefix.Get(),
+		logger:      c.Logger.Get(),
 	}
 }
 
 type StructConfig[T any] struct {
 	anyCallback AnyCallbackFunc
 	prefix      string
+	logger      *slog.Logger
 }
 
 func (sc StructConfig[T]) newType() (*Type, error) {
@@ -114,7 +121,7 @@ func (sc StructConfig[T]) from(r Receptor) error {
 
 // FromDefault sets "default" tag values to v.
 func (sc StructConfig[T]) FromDefault(v *T) error {
-	r, err := internal.DefaultReceptor(v, sc.anyCallback)
+	r, err := internal.DefaultReceptor(v, sc.anyCallback, sc.logger)
 	if err != nil {
 		return err
 	}
@@ -129,7 +136,7 @@ func (sc StructConfig[T]) FromDefault(v *T) error {
 //
 // All '.' and '-' will be replaced with '_', making it all uppsercase.
 func (sc StructConfig[T]) FromEnv(v *T) error {
-	r, err := internal.EnvReceptor(v, sc.anyCallback)
+	r, err := internal.EnvReceptor(v, sc.anyCallback, sc.logger)
 	if err != nil {
 		return err
 	}
@@ -140,7 +147,7 @@ func (sc StructConfig[T]) FromEnv(v *T) error {
 //
 // Flag name is from "name" tag value.
 func (sc StructConfig[T]) FromFlags(v *T, fs *pflag.FlagSet) error {
-	r, err := internal.PFlagGetReceptor(v, fs, sc.anyCallback)
+	r, err := internal.PFlagGetReceptor(v, fs, sc.anyCallback, sc.logger)
 	if err != nil {
 		return err
 	}
