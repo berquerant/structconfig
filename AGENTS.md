@@ -166,7 +166,7 @@ go tool task generate
 go tool task tidy
 ```
 
-Underlying test command: `go tool gotestsum --format pkgname --format-icons hivis -- -cover -race ./...`
+Underlying test command: `go test -cover -race ./...`
 
 ---
 
