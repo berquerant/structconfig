@@ -162,15 +162,15 @@ func PFlagGetConverter(fs *pflag.FlagSet) *DefaultConverter {
 		Float32Func:      fs.GetFloat32,
 		Float64Func:      fs.GetFloat64,
 		StringFunc:       fs.GetString,
-		BoolSliceFunc:    func(name string) ([]bool, error) { return fs.GetBoolSlice(name) },
-		IntSliceFunc:     func(name string) ([]int, error) { return fs.GetIntSlice(name) },
-		Int32SliceFunc:   func(name string) ([]int32, error) { return fs.GetInt32Slice(name) },
-		Int64SliceFunc:   func(name string) ([]int64, error) { return fs.GetInt64Slice(name) },
-		UintSliceFunc:    func(name string) ([]uint, error) { return fs.GetUintSlice(name) },
-		Float32SliceFunc: func(name string) ([]float32, error) { return fs.GetFloat32Slice(name) },
-		Float64SliceFunc: func(name string) ([]float64, error) { return fs.GetFloat64Slice(name) },
-		StringSliceFunc:  func(name string) ([]string, error) { return fs.GetStringSlice(name) },
-		DurationFunc:     func(name string) (time.Duration, error) { return fs.GetDuration(name) },
+		BoolSliceFunc:    fs.GetBoolSlice,
+		IntSliceFunc:     fs.GetIntSlice,
+		Int32SliceFunc:   fs.GetInt32Slice,
+		Int64SliceFunc:   fs.GetInt64Slice,
+		UintSliceFunc:    fs.GetUintSlice,
+		Float32SliceFunc: fs.GetFloat32Slice,
+		Float64SliceFunc: fs.GetFloat64Slice,
+		StringSliceFunc:  fs.GetStringSlice,
+		DurationFunc:     fs.GetDuration,
 		TimeFunc: func(name string) (time.Time, error) {
 			s, err := fs.GetString(name)
 			if err != nil {
@@ -181,8 +181,6 @@ func PFlagGetConverter(fs *pflag.FlagSet) *DefaultConverter {
 			}
 			return ParseTime(s)
 		},
-		CountFunc: func(name string) (int, error) {
-			return fs.GetCount(name)
-		},
+		CountFunc: fs.GetCount,
 	}
 }
