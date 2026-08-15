@@ -80,6 +80,17 @@ func (m Merger[T]) defaultValue() (T, error) {
 	return value, nil
 }
 
+func (m Merger[T]) selectNonDefaultValue(defaultVal, candidateVal reflect.Value) (reflect.Value, bool, error) {
+	ok, err := m.equal(defaultVal.Interface(), candidateVal.Interface())
+	if err != nil {
+		return reflect.Value{}, false, err
+	}
+	if !ok {
+		return candidateVal, true, nil
+	}
+	return reflect.Value{}, false, nil
+}
+
 // Merge values based on the 'default' tag values.
 // For each field, if the right value is not the default, use it; if not, use the left value.
 // If that is also the default, set the default value. Return this instance.
@@ -105,44 +116,30 @@ func (m Merger[T]) Merge(left, right T) (T, error) {
 		name := f.Name()
 		fv := vv.Elem().FieldByName(name)
 
-		{
-			rv := rValue.FieldByName(name)
-			ok, err := m.equal(fv.Interface(), rv.Interface())
-			if err != nil {
-				return v, err
-			}
-			if !ok {
-				// overwrite by not default value from right
-				fv.Set(rv)
-				if m.logger != nil {
-					m.logger.Debug(
-						"structconfig: merged field",
-						slog.String("field", name),
-						slog.String("source", "right"),
-						slog.Any("value", rv.Interface()),
-					)
-				}
-				continue
-			}
+		sources := []struct {
+			name  string
+			val   reflect.Value
+		}{
+			{"right", rValue.FieldByName(name)},
+			{"left", lValue.FieldByName(name)},
 		}
-		{
-			lv := lValue.FieldByName(name)
-			ok, err := m.equal(fv.Interface(), lv.Interface())
+
+		for _, src := range sources {
+			newVal, selected, err := m.selectNonDefaultValue(fv, src.val)
 			if err != nil {
 				return v, err
 			}
-			if !ok {
-				// overwrite by not default value from left
-				fv.Set(lv)
+			if selected {
+				fv.Set(newVal)
 				if m.logger != nil {
 					m.logger.Debug(
 						"structconfig: merged field",
 						slog.String("field", name),
-						slog.String("source", "left"),
-						slog.Any("value", lv.Interface()),
+						slog.String("source", src.name),
+						slog.Any("value", newVal.Interface()),
 					)
 				}
-				continue
+				break
 			}
 		}
 	}

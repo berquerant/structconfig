@@ -2,19 +2,18 @@ package internal
 
 import (
 	"os"
-	"regexp"
 	"strings"
 )
 
 var (
-	regexpEnvNameReplace = regexp.MustCompile(`[-.]`)
+	envNameReplacer = strings.NewReplacer("-", "_", ".", "_")
 )
 
 // EnvVar is a environment variable.
 type EnvVar string
 
 func NewEnvVar(name string) EnvVar {
-	s := regexpEnvNameReplace.ReplaceAllLiteralString(name, "_")
+	s := envNameReplacer.Replace(name)
 	return EnvVar(strings.ToUpper(s))
 }
 
