@@ -32,9 +32,9 @@ jobs:
           go-version-file: "go.mod"
           cache-dependency-path: go.sum
       - name: Lint
-        run: ./task lint
+        run: make lint
       - name: Test
-        run: ./task test
+        run: make test
 
   govulncheck:
     timeout-minutes: 5
