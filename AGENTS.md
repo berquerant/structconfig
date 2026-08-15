@@ -147,26 +147,26 @@ The `//go:generate` directives are in [`structconfig.go`](structconfig.go) and [
 
 ## Development Workflow
 
-This project uses [Task](https://taskfile.dev/) ([`Taskfile.yml`](Taskfile.yml)).
+This project uses `make` ([`Makefile`](Makefile)).
 
 ```shell
 # Run lint + tests (default)
-go tool task
+make
 
 # Run tests only (with race detector and coverage)
-go tool task test
+make test
 
 # Run go vet
-go tool task vet
+make vet
 
 # Regenerate generated files
-go tool task generate
+make generate
 
 # Tidy go.mod
-go tool task tidy
+make tidy
 ```
 
-Underlying test command: `go tool gotestsum --format pkgname --format-icons hivis -- -cover -race ./...`
+Underlying test command: `go test -cover -race ./...`
 
 ---
 
