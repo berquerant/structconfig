@@ -21,25 +21,21 @@ func (b *Builder[T]) Add(f func(*StructConfig[T]) (*T, error)) *Builder[T] {
 
 // Build generates a Config in order from the generators added earlier and override them accordingly.
 func (b *Builder[T]) Build() (*T, error) {
-	configList := make([]*T, len(b.chain))
-	for i, c := range b.chain {
-		x, err := b.newConfig(c)
-		if err != nil {
-			return nil, err
-		}
-		configList[i] = x
-	}
-
 	r, err := b.newDefault()
 	if err != nil {
 		return nil, err
 	}
-	for _, c := range configList {
-		x, err := b.merger.Merge(*r, *c)
+
+	for _, c := range b.chain {
+		x, err := b.newConfig(c)
 		if err != nil {
 			return nil, err
 		}
-		r = &x
+		merged, err := b.merger.Merge(*r, *x)
+		if err != nil {
+			return nil, err
+		}
+		r = &merged
 	}
 
 	return r, nil
