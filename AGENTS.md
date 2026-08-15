@@ -113,6 +113,7 @@ User's struct T (with tags)
 | `default:"<val>"` | Default value (string form). Used by `DefaultReceptor` and `Merger`. |
 | `usage:"<text>"` | Flag usage string for pflag. |
 | `short:"<char>"` | Single-character shorthand for pflag. |
+| `count:"true"` | Flag that counts the number of times it is provided (e.g. `-v`, `-vv`). |
 
 A `prefix` option (`WithPrefix`) prepends a string to all tag key names, enabling namespaced tags.
 
@@ -120,9 +121,12 @@ A `prefix` option (`WithPrefix`) prepends a string to all tag key names, enablin
 
 ## Supported Field Types
 
-Natively supported `reflect.Kind` values (handled by the typed pipeline):
+Natively supported `reflect.Kind` and special types (handled by the typed pipeline):
 
-`bool`, `int`, `int8`, `int16`, `int32`, `int64`, `uint`, `uint8`, `uint16`, `uint32`, `uint64`, `float32`, `float64`, `string`
+- **Primitives**: `bool`, `int`, `int8`, `int16`, `int32`, `int64`, `uint`, `uint8`, `uint16`, `uint32`, `uint64`, `float32`, `float64`, `string`
+- **Slices**: `[]bool`, `[]int`, `[]int32`, `[]int64`, `[]uint`, `[]float32`, `[]float64`, `[]string`
+- **Time & Duration**: `time.Duration`, `time.Time` (RFC3339 format)
+- **Count flags**: `int` / `uint` with `count:"true"` tag
 
 All other kinds route to the `Any` method. Provide a custom `AnyCallback` (`WithAnyCallback`) to parse and set these fields. Supply `AnyEqual` for correct merge behavior on non-primitive fields.
 

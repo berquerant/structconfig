@@ -16,6 +16,7 @@ func TestTag(t *testing.T) {
 		T4 int `aname:"t4" ashort:"t"`
 		T5 int
 		T6 int `name:"-"`
+		T7 int `name:"t7" count:"true"`
 	}
 
 	v := reflect.TypeFor[A]()
@@ -60,9 +61,13 @@ func TestTag(t *testing.T) {
 		_, ok := x.Name()
 		assert.False(t, ok)
 	})
-	t.Run("T5", func(t *testing.T) {
+	t.Run("T6", func(t *testing.T) {
 		x := internal.NewTag(v.Field(5).Tag, "")
 		_, ok := x.Name()
 		assert.False(t, ok)
+	})
+	t.Run("T7", func(t *testing.T) {
+		x := internal.NewTag(v.Field(6).Tag, "")
+		assert.True(t, x.Count())
 	})
 }

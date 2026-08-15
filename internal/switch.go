@@ -6,8 +6,8 @@ import (
 )
 
 var (
-	durationTyp = reflect.TypeOf(time.Duration(0))
-	timeTyp     = reflect.TypeOf(time.Time{})
+	durationTyp = reflect.TypeFor[time.Duration]()
+	timeTyp     = reflect.TypeFor[time.Time]()
 )
 
 // Call calls the appropriate method of r for the field f.

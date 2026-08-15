@@ -49,11 +49,17 @@ func (m Merger[T]) equal(left, right any) (bool, error) {
 	}
 
 	lType, rType := reflect.TypeOf(left), reflect.TypeOf(right)
-	if lType.Kind() != rType.Kind() {
+	if lType != rType {
 		return false, nil
 	}
 	if IsSupportedKind(lType.Kind()) {
 		return left == right, nil
+	}
+	if lType.Kind() == reflect.Slice && IsSupportedKind(lType.Elem().Kind()) {
+		return reflect.DeepEqual(left, right), nil
+	}
+	if lType == durationTyp || lType == timeTyp {
+		return reflect.DeepEqual(left, right), nil
 	}
 	if eq := m.anyEqual; eq != nil {
 		return eq(left, right)

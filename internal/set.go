@@ -1,6 +1,9 @@
 package internal
 
-import "reflect"
+import (
+	"reflect"
+	"time"
+)
 
 // SetReceptor returns a new PairsReceptor to set value to ptr.
 //
@@ -71,6 +74,11 @@ func SetTypedReceptor(
 		notify(s, rawVal)
 		return nil
 	}
+	setVal := func(s StructField, val reflect.Value, rawVal any) error {
+		fv(s).Set(val)
+		notify(s, rawVal)
+		return nil
+	}
 
 	return &DefaultTypedReceptor{
 		BoolFunc: func(s StructField, v bool) error {
@@ -94,6 +102,39 @@ func SetTypedReceptor(
 			fv(s).SetString(v)
 			notify(s, v)
 			return nil
+		},
+		BoolSliceFunc: func(s StructField, v []bool) error {
+			return setVal(s, reflect.ValueOf(v), v)
+		},
+		IntSliceFunc: func(s StructField, v []int) error {
+			return setVal(s, reflect.ValueOf(v), v)
+		},
+		Int32SliceFunc: func(s StructField, v []int32) error {
+			return setVal(s, reflect.ValueOf(v), v)
+		},
+		Int64SliceFunc: func(s StructField, v []int64) error {
+			return setVal(s, reflect.ValueOf(v), v)
+		},
+		UintSliceFunc: func(s StructField, v []uint) error {
+			return setVal(s, reflect.ValueOf(v), v)
+		},
+		Float32SliceFunc: func(s StructField, v []float32) error {
+			return setVal(s, reflect.ValueOf(v), v)
+		},
+		Float64SliceFunc: func(s StructField, v []float64) error {
+			return setVal(s, reflect.ValueOf(v), v)
+		},
+		StringSliceFunc: func(s StructField, v []string) error {
+			return setVal(s, reflect.ValueOf(v), v)
+		},
+		DurationFunc: func(s StructField, v time.Duration) error {
+			return setInt(s, int64(v), v)
+		},
+		TimeFunc: func(s StructField, v time.Time) error {
+			return setVal(s, reflect.ValueOf(v), v)
+		},
+		CountFunc: func(s StructField, v int) error {
+			return setInt(s, int64(v), v)
 		},
 		AnyFunc: func(s StructField, v string) error {
 			if anyCallback == nil {

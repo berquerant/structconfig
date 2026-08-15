@@ -13,6 +13,7 @@ const (
 	TagUsage   = internal.TagUsage
 	TagDefault = internal.TagDefault
 	TagShort   = internal.TagShort
+	TagCount   = internal.TagCount
 )
 
 var (
