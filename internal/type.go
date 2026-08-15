@@ -30,6 +30,7 @@ func (t Type) Fields() []StructField {
 			x.Name,
 			x.Type.Kind(),
 			NewTag(x.Tag, t.prefix),
+			x.Type,
 		)
 	}
 	return xs

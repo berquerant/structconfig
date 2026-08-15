@@ -22,21 +22,25 @@ var (
 )
 
 type (
-	StructField     = internal.StructField
-	Type            = internal.Type
-	Tag             = internal.Tag
-	EnvVar          = internal.EnvVar
-	Receptor        = internal.Receptor
-	BoolReceptor    = internal.BoolReceptor
-	IntReceptor     = internal.IntReceptor
-	UintReceptor    = internal.UintReceptor
-	FloatReceptor   = internal.FloatReceptor
-	StringReceptor  = internal.StringReceptor
-	AnyReceptor     = internal.AnyReceptor
-	AnyCallbackFunc = func(StructField, string, func() reflect.Value) error
-	AnyEqualFunc    = func(left, right any) (bool, error)
-	Unsigned        = internal.Unsigned
-	Supported       = internal.Supported
+	StructField      = internal.StructField
+	Type             = internal.Type
+	Tag              = internal.Tag
+	EnvVar           = internal.EnvVar
+	Receptor         = internal.Receptor
+	BoolReceptor     = internal.BoolReceptor
+	IntReceptor      = internal.IntReceptor
+	UintReceptor     = internal.UintReceptor
+	FloatReceptor    = internal.FloatReceptor
+	StringReceptor   = internal.StringReceptor
+	SliceReceptor    = internal.SliceReceptor
+	DurationReceptor = internal.DurationReceptor
+	TimeReceptor     = internal.TimeReceptor
+	CountReceptor    = internal.CountReceptor
+	AnyReceptor      = internal.AnyReceptor
+	AnyCallbackFunc  = func(StructField, string, func() reflect.Value) error
+	AnyEqualFunc     = func(left, right any) (bool, error)
+	Unsigned         = internal.Unsigned
+	Supported        = internal.Supported
 )
 
 func IsSupportedKind(k reflect.Kind) bool         { return internal.IsSupportedKind(k) }

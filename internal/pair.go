@@ -1,6 +1,9 @@
 package internal
 
-import "errors"
+import (
+	"errors"
+	"time"
+)
 
 var (
 	// Result of conv as default value in ParsePair.
@@ -63,38 +66,60 @@ var _ Receptor = &PairsReceptor{}
 
 // PairsReceptor is a set of [ParsePair], implements [Receptor].
 type PairsReceptor struct {
-	BoolPair    *ParsePair[bool]
-	IntPair     *ParsePair[int]
-	Int8Pair    *ParsePair[int8]
-	Int16Pair   *ParsePair[int16]
-	Int32Pair   *ParsePair[int32]
-	Int64Pair   *ParsePair[int64]
-	UintPair    *ParsePair[uint]
-	Uint8Pair   *ParsePair[uint8]
-	Uint16Pair  *ParsePair[uint16]
-	Uint32Pair  *ParsePair[uint32]
-	Uint64Pair  *ParsePair[uint64]
-	Float32Pair *ParsePair[float32]
-	Float64Pair *ParsePair[float64]
-	StringPair  *ParsePair[string]
-	AnyPair     *ParsePair[string]
+	BoolPair         *ParsePair[bool]
+	IntPair          *ParsePair[int]
+	Int8Pair         *ParsePair[int8]
+	Int16Pair        *ParsePair[int16]
+	Int32Pair        *ParsePair[int32]
+	Int64Pair        *ParsePair[int64]
+	UintPair         *ParsePair[uint]
+	Uint8Pair        *ParsePair[uint8]
+	Uint16Pair       *ParsePair[uint16]
+	Uint32Pair       *ParsePair[uint32]
+	Uint64Pair       *ParsePair[uint64]
+	Float32Pair      *ParsePair[float32]
+	Float64Pair      *ParsePair[float64]
+	StringPair       *ParsePair[string]
+	BoolSlicePair    *ParsePair[[]bool]
+	IntSlicePair     *ParsePair[[]int]
+	Int32SlicePair   *ParsePair[[]int32]
+	Int64SlicePair   *ParsePair[[]int64]
+	UintSlicePair    *ParsePair[[]uint]
+	Float32SlicePair *ParsePair[[]float32]
+	Float64SlicePair *ParsePair[[]float64]
+	StringSlicePair  *ParsePair[[]string]
+	DurationPair     *ParsePair[time.Duration]
+	TimePair         *ParsePair[time.Time]
+	CountPair        *ParsePair[int]
+	AnyPair          *ParsePair[string]
 }
 
-func (r PairsReceptor) Bool(f StructField) error    { return r.BoolPair.Try(f) }
-func (r PairsReceptor) Int(f StructField) error     { return r.IntPair.Try(f) }
-func (r PairsReceptor) Int8(f StructField) error    { return r.Int8Pair.Try(f) }
-func (r PairsReceptor) Int16(f StructField) error   { return r.Int16Pair.Try(f) }
-func (r PairsReceptor) Int32(f StructField) error   { return r.Int32Pair.Try(f) }
-func (r PairsReceptor) Int64(f StructField) error   { return r.Int64Pair.Try(f) }
-func (r PairsReceptor) Uint(f StructField) error    { return r.UintPair.Try(f) }
-func (r PairsReceptor) Uint8(f StructField) error   { return r.Uint8Pair.Try(f) }
-func (r PairsReceptor) Uint16(f StructField) error  { return r.Uint16Pair.Try(f) }
-func (r PairsReceptor) Uint32(f StructField) error  { return r.Uint32Pair.Try(f) }
-func (r PairsReceptor) Uint64(f StructField) error  { return r.Uint64Pair.Try(f) }
-func (r PairsReceptor) Float32(f StructField) error { return r.Float32Pair.Try(f) }
-func (r PairsReceptor) Float64(f StructField) error { return r.Float64Pair.Try(f) }
-func (r PairsReceptor) String(f StructField) error  { return r.StringPair.Try(f) }
-func (r PairsReceptor) Any(f StructField) error     { return r.AnyPair.Try(f) }
+func (r PairsReceptor) Bool(f StructField) error         { return r.BoolPair.Try(f) }
+func (r PairsReceptor) Int(f StructField) error          { return r.IntPair.Try(f) }
+func (r PairsReceptor) Int8(f StructField) error         { return r.Int8Pair.Try(f) }
+func (r PairsReceptor) Int16(f StructField) error        { return r.Int16Pair.Try(f) }
+func (r PairsReceptor) Int32(f StructField) error        { return r.Int32Pair.Try(f) }
+func (r PairsReceptor) Int64(f StructField) error        { return r.Int64Pair.Try(f) }
+func (r PairsReceptor) Uint(f StructField) error         { return r.UintPair.Try(f) }
+func (r PairsReceptor) Uint8(f StructField) error        { return r.Uint8Pair.Try(f) }
+func (r PairsReceptor) Uint16(f StructField) error       { return r.Uint16Pair.Try(f) }
+func (r PairsReceptor) Uint32(f StructField) error       { return r.Uint32Pair.Try(f) }
+func (r PairsReceptor) Uint64(f StructField) error       { return r.Uint64Pair.Try(f) }
+func (r PairsReceptor) Float32(f StructField) error      { return r.Float32Pair.Try(f) }
+func (r PairsReceptor) Float64(f StructField) error      { return r.Float64Pair.Try(f) }
+func (r PairsReceptor) String(f StructField) error       { return r.StringPair.Try(f) }
+func (r PairsReceptor) BoolSlice(f StructField) error    { return r.BoolSlicePair.Try(f) }
+func (r PairsReceptor) IntSlice(f StructField) error     { return r.IntSlicePair.Try(f) }
+func (r PairsReceptor) Int32Slice(f StructField) error   { return r.Int32SlicePair.Try(f) }
+func (r PairsReceptor) Int64Slice(f StructField) error   { return r.Int64SlicePair.Try(f) }
+func (r PairsReceptor) UintSlice(f StructField) error    { return r.UintSlicePair.Try(f) }
+func (r PairsReceptor) Float32Slice(f StructField) error { return r.Float32SlicePair.Try(f) }
+func (r PairsReceptor) Float64Slice(f StructField) error { return r.Float64SlicePair.Try(f) }
+func (r PairsReceptor) StringSlice(f StructField) error  { return r.StringSlicePair.Try(f) }
+func (r PairsReceptor) Duration(f StructField) error     { return r.DurationPair.Try(f) }
+func (r PairsReceptor) Time(f StructField) error         { return r.TimePair.Try(f) }
+func (r PairsReceptor) Count(f StructField) error        { return r.CountPair.Try(f) }
+func (r PairsReceptor) Any(f StructField) error          { return r.AnyPair.Try(f) }
 
 // PairsSynthReceptor synthesizes [Converter] and [TypedReceptor].
 // get extracts the value from [StructField], converter converts it and typedReceptor accepts it.
