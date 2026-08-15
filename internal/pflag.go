@@ -3,6 +3,7 @@ package internal
 import (
 	"log/slog"
 	"reflect"
+	"time"
 
 	"github.com/spf13/pflag"
 )
@@ -82,41 +83,104 @@ func pflagSetFunc[T any](
 	}
 }
 
+func pflagCountSetFunc(
+	f func(string, string, string) *int,
+) TypedReceptorFunc[int] {
+	return func(s StructField, defaultValue int) error {
+		if name, ok := s.Tag().Name(); ok {
+			short, _ := s.Tag().Short()
+			_ = f(name, short, s.Tag().Usage())
+		}
+		return nil
+	}
+}
+
+func pflagTimeSetFunc(
+	f func(string, string, string) *string,
+	g func(string, string, string, string) *string,
+) TypedReceptorFunc[time.Time] {
+	return func(s StructField, defaultValue time.Time) error {
+		if name, ok := s.Tag().Name(); ok {
+			defStr := ""
+			if !defaultValue.IsZero() {
+				defStr = defaultValue.Format(time.RFC3339)
+			}
+			if short, ok := s.Tag().Short(); ok {
+				_ = g(name, short, defStr, s.Tag().Usage())
+				return nil
+			}
+			_ = f(name, defStr, s.Tag().Usage())
+		}
+		return nil
+	}
+}
+
 func PFlagSetTypeReceptor(fs *pflag.FlagSet) *DefaultTypedReceptor {
 	return &DefaultTypedReceptor{
-		BoolFunc:    pflagSetFunc(fs.Bool, fs.BoolP),
-		IntFunc:     pflagSetFunc(fs.Int, fs.IntP),
-		Int8Func:    pflagSetFunc(fs.Int8, fs.Int8P),
-		Int16Func:   pflagSetFunc(fs.Int16, fs.Int16P),
-		Int32Func:   pflagSetFunc(fs.Int32, fs.Int32P),
-		Int64Func:   pflagSetFunc(fs.Int64, fs.Int64P),
-		UintFunc:    pflagSetFunc(fs.Uint, fs.UintP),
-		Uint8Func:   pflagSetFunc(fs.Uint8, fs.Uint8P),
-		Uint16Func:  pflagSetFunc(fs.Uint16, fs.Uint16P),
-		Uint32Func:  pflagSetFunc(fs.Uint32, fs.Uint32P),
-		Uint64Func:  pflagSetFunc(fs.Uint64, fs.Uint64P),
-		Float32Func: pflagSetFunc(fs.Float32, fs.Float32P),
-		Float64Func: pflagSetFunc(fs.Float64, fs.Float64P),
-		StringFunc:  pflagSetFunc(fs.String, fs.StringP),
-		AnyFunc:     pflagSetFunc(fs.String, fs.StringP),
+		BoolFunc:         pflagSetFunc(fs.Bool, fs.BoolP),
+		IntFunc:          pflagSetFunc(fs.Int, fs.IntP),
+		Int8Func:         pflagSetFunc(fs.Int8, fs.Int8P),
+		Int16Func:        pflagSetFunc(fs.Int16, fs.Int16P),
+		Int32Func:        pflagSetFunc(fs.Int32, fs.Int32P),
+		Int64Func:        pflagSetFunc(fs.Int64, fs.Int64P),
+		UintFunc:         pflagSetFunc(fs.Uint, fs.UintP),
+		Uint8Func:        pflagSetFunc(fs.Uint8, fs.Uint8P),
+		Uint16Func:       pflagSetFunc(fs.Uint16, fs.Uint16P),
+		Uint32Func:       pflagSetFunc(fs.Uint32, fs.Uint32P),
+		Uint64Func:       pflagSetFunc(fs.Uint64, fs.Uint64P),
+		Float32Func:      pflagSetFunc(fs.Float32, fs.Float32P),
+		Float64Func:      pflagSetFunc(fs.Float64, fs.Float64P),
+		StringFunc:       pflagSetFunc(fs.String, fs.StringP),
+		BoolSliceFunc:    pflagSetFunc(fs.BoolSlice, fs.BoolSliceP),
+		IntSliceFunc:     pflagSetFunc(fs.IntSlice, fs.IntSliceP),
+		Int32SliceFunc:   pflagSetFunc(fs.Int32Slice, fs.Int32SliceP),
+		Int64SliceFunc:   pflagSetFunc(fs.Int64Slice, fs.Int64SliceP),
+		UintSliceFunc:    pflagSetFunc(fs.UintSlice, fs.UintSliceP),
+		Float32SliceFunc: pflagSetFunc(fs.Float32Slice, fs.Float32SliceP),
+		Float64SliceFunc: pflagSetFunc(fs.Float64Slice, fs.Float64SliceP),
+		StringSliceFunc:  pflagSetFunc(fs.StringSlice, fs.StringSliceP),
+		DurationFunc:     pflagSetFunc(fs.Duration, fs.DurationP),
+		TimeFunc:         pflagTimeSetFunc(fs.String, fs.StringP),
+		CountFunc:        pflagCountSetFunc(fs.CountP),
+		AnyFunc:          pflagSetFunc(fs.String, fs.StringP),
 	}
 }
 
 func PFlagGetConverter(fs *pflag.FlagSet) *DefaultConverter {
 	return &DefaultConverter{
-		BoolFunc:    fs.GetBool,
-		IntFunc:     fs.GetInt,
-		Int8Func:    fs.GetInt8,
-		Int16Func:   fs.GetInt16,
-		Int32Func:   fs.GetInt32,
-		Int64Func:   fs.GetInt64,
-		UintFunc:    fs.GetUint,
-		Uint8Func:   fs.GetUint8,
-		Uint16Func:  fs.GetUint16,
-		Uint32Func:  fs.GetUint32,
-		Uint64Func:  fs.GetUint64,
-		Float32Func: fs.GetFloat32,
-		Float64Func: fs.GetFloat64,
-		StringFunc:  fs.GetString,
+		BoolFunc:         fs.GetBool,
+		IntFunc:          fs.GetInt,
+		Int8Func:         fs.GetInt8,
+		Int16Func:        fs.GetInt16,
+		Int32Func:        fs.GetInt32,
+		Int64Func:        fs.GetInt64,
+		UintFunc:         fs.GetUint,
+		Uint8Func:        fs.GetUint8,
+		Uint16Func:       fs.GetUint16,
+		Uint32Func:       fs.GetUint32,
+		Uint64Func:       fs.GetUint64,
+		Float32Func:      fs.GetFloat32,
+		Float64Func:      fs.GetFloat64,
+		StringFunc:       fs.GetString,
+		BoolSliceFunc:    fs.GetBoolSlice,
+		IntSliceFunc:     fs.GetIntSlice,
+		Int32SliceFunc:   fs.GetInt32Slice,
+		Int64SliceFunc:   fs.GetInt64Slice,
+		UintSliceFunc:    fs.GetUintSlice,
+		Float32SliceFunc: fs.GetFloat32Slice,
+		Float64SliceFunc: fs.GetFloat64Slice,
+		StringSliceFunc:  fs.GetStringSlice,
+		DurationFunc:     fs.GetDuration,
+		TimeFunc: func(name string) (time.Time, error) {
+			s, err := fs.GetString(name)
+			if err != nil {
+				return time.Time{}, err
+			}
+			if s == "" {
+				return time.Time{}, nil
+			}
+			return ParseTime(s)
+		},
+		CountFunc: fs.GetCount,
 	}
 }

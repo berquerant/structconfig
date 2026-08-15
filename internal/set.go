@@ -1,6 +1,9 @@
 package internal
 
-import "reflect"
+import (
+	"reflect"
+	"time"
+)
 
 // SetReceptor returns a new PairsReceptor to set value to ptr.
 //
@@ -71,6 +74,14 @@ func SetTypedReceptor(
 		notify(s, rawVal)
 		return nil
 	}
+	setVal := func(s StructField, val reflect.Value, rawVal any) error {
+		fv(s).Set(val)
+		notify(s, rawVal)
+		return nil
+	}
+	setAnyVal := func(s StructField, v any) error {
+		return setVal(s, reflect.ValueOf(v), v)
+	}
 
 	return &DefaultTypedReceptor{
 		BoolFunc: func(s StructField, v bool) error {
@@ -78,23 +89,30 @@ func SetTypedReceptor(
 			notify(s, v)
 			return nil
 		},
-		IntFunc:     func(s StructField, v int) error { return setInt(s, int64(v), v) },
-		Int8Func:    func(s StructField, v int8) error { return setInt(s, int64(v), v) },
-		Int16Func:   func(s StructField, v int16) error { return setInt(s, int64(v), v) },
-		Int32Func:   func(s StructField, v int32) error { return setInt(s, int64(v), v) },
-		Int64Func:   func(s StructField, v int64) error { return setInt(s, v, v) },
-		UintFunc:    func(s StructField, v uint) error { return setUint(s, uint64(v), v) },
-		Uint8Func:   func(s StructField, v uint8) error { return setUint(s, uint64(v), v) },
-		Uint16Func:  func(s StructField, v uint16) error { return setUint(s, uint64(v), v) },
-		Uint32Func:  func(s StructField, v uint32) error { return setUint(s, uint64(v), v) },
-		Uint64Func:  func(s StructField, v uint64) error { return setUint(s, v, v) },
-		Float32Func: func(s StructField, v float32) error { return setFloat(s, float64(v), v) },
-		Float64Func: func(s StructField, v float64) error { return setFloat(s, v, v) },
-		StringFunc: func(s StructField, v string) error {
-			fv(s).SetString(v)
-			notify(s, v)
-			return nil
-		},
+		IntFunc:          func(s StructField, v int) error { return setInt(s, int64(v), v) },
+		Int8Func:         func(s StructField, v int8) error { return setInt(s, int64(v), v) },
+		Int16Func:        func(s StructField, v int16) error { return setInt(s, int64(v), v) },
+		Int32Func:        func(s StructField, v int32) error { return setInt(s, int64(v), v) },
+		Int64Func:        func(s StructField, v int64) error { return setInt(s, v, v) },
+		UintFunc:         func(s StructField, v uint) error { return setUint(s, uint64(v), v) },
+		Uint8Func:        func(s StructField, v uint8) error { return setUint(s, uint64(v), v) },
+		Uint16Func:       func(s StructField, v uint16) error { return setUint(s, uint64(v), v) },
+		Uint32Func:       func(s StructField, v uint32) error { return setUint(s, uint64(v), v) },
+		Uint64Func:       func(s StructField, v uint64) error { return setUint(s, v, v) },
+		Float32Func:      func(s StructField, v float32) error { return setFloat(s, float64(v), v) },
+		Float64Func:      func(s StructField, v float64) error { return setFloat(s, v, v) },
+		StringFunc:       func(s StructField, v string) error { fv(s).SetString(v); notify(s, v); return nil },
+		BoolSliceFunc:    func(s StructField, v []bool) error { return setAnyVal(s, v) },
+		IntSliceFunc:     func(s StructField, v []int) error { return setAnyVal(s, v) },
+		Int32SliceFunc:   func(s StructField, v []int32) error { return setAnyVal(s, v) },
+		Int64SliceFunc:   func(s StructField, v []int64) error { return setAnyVal(s, v) },
+		UintSliceFunc:    func(s StructField, v []uint) error { return setAnyVal(s, v) },
+		Float32SliceFunc: func(s StructField, v []float32) error { return setAnyVal(s, v) },
+		Float64SliceFunc: func(s StructField, v []float64) error { return setAnyVal(s, v) },
+		StringSliceFunc:  func(s StructField, v []string) error { return setAnyVal(s, v) },
+		DurationFunc:     func(s StructField, v time.Duration) error { return setInt(s, int64(v), v) },
+		TimeFunc:         func(s StructField, v time.Time) error { return setAnyVal(s, v) },
+		CountFunc:        func(s StructField, v int) error { return setInt(s, int64(v), v) },
 		AnyFunc: func(s StructField, v string) error {
 			if anyCallback == nil {
 				return nil

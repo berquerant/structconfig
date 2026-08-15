@@ -1,7 +1,6 @@
 package internal_test
 
 import (
-	"encoding/json"
 	"reflect"
 	"sort"
 	"testing"
@@ -12,14 +11,18 @@ import (
 )
 
 func TestPFlagReceptor(t *testing.T) {
+	type CustomStruct struct {
+		Name string
+	}
+
 	type T struct {
-		B         bool    `name:"fb" default:"false" usage:"BOOL"`
-		I         int     `name:"fi" default:"1" usage:"INT"`
-		U         uint    `name:"fu" default:"10" usage:"UINT"`
-		F         float32 `name:"ff" default:"1.1" usage:"FLOAT"`
-		S         string  `name:"fs" default:"str" usage:"STRING" short:"s"`
-		NoDefault int     `name:"fnodefault"`
-		Slice     []int   `name:"fslice" default:"[1,2]"`
+		B         bool         `name:"fb" default:"false" usage:"BOOL"`
+		I         int          `name:"fi" default:"1" usage:"INT"`
+		U         uint         `name:"fu" default:"10" usage:"UINT"`
+		F         float32      `name:"ff" default:"1.1" usage:"FLOAT"`
+		S         string       `name:"fs" default:"str" usage:"STRING" short:"s"`
+		NoDefault int          `name:"fnodefault"`
+		V         CustomStruct `name:"fv" default:"def"`
 		Ignore1   int
 		Ignore2   int `name:"-" default:"1000" usage:"IGNORE2"`
 	}
@@ -31,7 +34,7 @@ func TestPFlagReceptor(t *testing.T) {
 		"ff",
 		"fs",
 		"fnodefault",
-		"fslice",
+		"fv",
 	}
 	sort.Strings(flagNames)
 
@@ -50,11 +53,11 @@ func TestPFlagReceptor(t *testing.T) {
 				"-s", "SHORT",
 			},
 			want: T{
-				I:     1,
-				U:     10,
-				F:     1.1,
-				S:     "SHORT",
-				Slice: []int{1, 2},
+				I: 1,
+				U: 10,
+				F: 1.1,
+				S: "SHORT",
+				V: CustomStruct{Name: "def"},
 			},
 		},
 		{
@@ -66,7 +69,7 @@ func TestPFlagReceptor(t *testing.T) {
 				"--ff", "10.1",
 				"--fs", "changed",
 				"--fnodefault", "-24",
-				"--fslice", "[]",
+				"--fv", "custom",
 			},
 			want: T{
 				B:         true,
@@ -75,39 +78,39 @@ func TestPFlagReceptor(t *testing.T) {
 				F:         10.1,
 				S:         "changed",
 				NoDefault: -24,
-				Slice:     []int{},
+				V:         CustomStruct{Name: "custom"},
 			},
 		},
 		{
-			title: "change fslice",
-			args:  []string{"--fslice", "[1,2,3]"},
+			title: "change fv",
+			args:  []string{"--fv", "custom_only"},
 			want: T{
-				I:     1,
-				U:     10,
-				F:     1.1,
-				S:     "str",
-				Slice: []int{1, 2, 3},
+				I: 1,
+				U: 10,
+				F: 1.1,
+				S: "str",
+				V: CustomStruct{Name: "custom_only"},
 			},
 		},
 		{
 			title: "change fi",
 			args:  []string{"--fi", "1000"},
 			want: T{
-				I:     1000,
-				U:     10,
-				F:     1.1,
-				S:     "str",
-				Slice: []int{1, 2},
+				I: 1000,
+				U: 10,
+				F: 1.1,
+				S: "str",
+				V: CustomStruct{Name: "def"},
 			},
 		},
 		{
 			title: "default",
 			want: T{
-				I:     1,
-				U:     10,
-				F:     1.1,
-				S:     "str",
-				Slice: []int{1, 2},
+				I: 1,
+				U: 10,
+				F: 1.1,
+				S: "str",
+				V: CustomStruct{Name: "def"},
 			},
 		},
 	} {
@@ -138,11 +141,7 @@ func TestPFlagReceptor(t *testing.T) {
 					&got,
 					fs,
 					func(_ internal.StructField, v string, fv func() reflect.Value) error {
-						var xs []int
-						if err := json.Unmarshal([]byte(v), &xs); err != nil {
-							return err
-						}
-						fv().Set(reflect.ValueOf(xs))
+						fv().Set(reflect.ValueOf(CustomStruct{Name: v}))
 						return nil
 					},
 					nil,

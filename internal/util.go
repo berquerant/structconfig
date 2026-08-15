@@ -1,9 +1,12 @@
 package internal
 
 import (
+	"encoding/csv"
 	"errors"
 	"reflect"
 	"strconv"
+	"strings"
+	"time"
 
 	"golang.org/x/exp/constraints"
 )
@@ -43,6 +46,44 @@ func ParseUint[T constraints.Unsigned](s string) (T, error) {
 func ParseFloat[T constraints.Float](s string) (T, error) {
 	v, err := strconv.ParseFloat(s, 64)
 	return T(v), err
+}
+
+func ParseDuration(s string) (time.Duration, error) {
+	return time.ParseDuration(s)
+}
+
+func ParseTime(s string) (time.Time, error) {
+	return time.Parse(time.RFC3339, s)
+}
+
+func ParseSlice[T any](s string, elemConv func(string) (T, error)) ([]T, error) {
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return []T{}, nil
+	}
+	s = strings.TrimPrefix(s, "[")
+	s = strings.TrimSuffix(s, "]")
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return []T{}, nil
+	}
+	r := csv.NewReader(strings.NewReader(s))
+	r.TrimLeadingSpace = true
+	records, err := r.ReadAll()
+	if err != nil {
+		return nil, err
+	}
+	var result []T
+	for _, row := range records {
+		for _, item := range row {
+			v, err := elemConv(item)
+			if err != nil {
+				return nil, err
+			}
+			result = append(result, v)
+		}
+	}
+	return result, nil
 }
 
 func IsSupportedKind(k reflect.Kind) bool {
