@@ -158,3 +158,75 @@ func ExampleStructConfig_FromFlags_prefix() {
 	// bool_value,string_value
 	// true sv
 }
+
+func Example_stringSliceSplitAndSep() {
+	// split: false (default): does not split elements by delimiter.
+	// - CLI flags: multiple flags are accumulated as elements (e.g. --raw "a,b" --raw "c" => []string{"a,b", "c"}).
+	// - Env / Default: a single string is assigned as a 1-element slice (e.g. RAW="a,b" => []string{"a,b"}).
+	//
+	// split: true (default sep: ","): splits elements by comma (CSV format).
+	// - e.g. --csv "a,b" --csv "c" => []string{"a", "b", "c"}.
+	//
+	// split: true + sep: ";": splits elements by custom delimiter.
+	// - e.g. --custom "a;b" --custom "c" => []string{"a", "b", "c"}.
+	type T struct {
+		Raw    []string `name:"raw" default:"a,b"`
+		Csv    []string `name:"csv" default:"a,b" split:"true"`
+		Custom []string `name:"custom" default:"a;b" split:"true" sep:";"`
+	}
+
+	sc := structconfig.New[T]()
+
+	// 1. FromDefault
+	var def T
+	if err := sc.FromDefault(&def); err != nil {
+		panic(err)
+	}
+	fmt.Printf("Default: Raw=%v, Csv=%v, Custom=%v\n", def.Raw, def.Csv, def.Custom)
+
+	// 2. FromEnv
+	envs := map[string]string{
+		"RAW":    "x,y",
+		"CSV":    "x,y",
+		"CUSTOM": "x;y",
+	}
+	for k, v := range envs {
+		os.Setenv(k, v)
+	}
+	defer func() {
+		for k := range envs {
+			os.Unsetenv(k)
+		}
+	}()
+
+	var fromEnv T
+	if err := sc.FromEnv(&fromEnv); err != nil {
+		panic(err)
+	}
+	fmt.Printf("Env: Raw=%v, Csv=%v, Custom=%v\n", fromEnv.Raw, fromEnv.Csv, fromEnv.Custom)
+
+	// 3. FromFlags
+	fs := pflag.NewFlagSet("example", pflag.ContinueOnError)
+	if err := sc.SetFlags(fs); err != nil {
+		panic(err)
+	}
+	args := []string{
+		"--raw", "1,2", "--raw", "3",
+		"--csv", "1,2", "--csv", "3",
+		"--custom", "1;2", "--custom", "3",
+	}
+	if err := fs.Parse(args); err != nil {
+		panic(err)
+	}
+
+	var fromFlags T
+	if err := sc.FromFlags(&fromFlags, fs); err != nil {
+		panic(err)
+	}
+	fmt.Printf("Flags: Raw=%v, Csv=%v, Custom=%v\n", fromFlags.Raw, fromFlags.Csv, fromFlags.Custom)
+
+	// Output:
+	// Default: Raw=[a,b], Csv=[a b], Custom=[a b]
+	// Env: Raw=[x,y], Csv=[x y], Custom=[x y]
+	// Flags: Raw=[1,2 3], Csv=[1 2 3], Custom=[1 2 3]
+}
