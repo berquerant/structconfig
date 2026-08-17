@@ -43,6 +43,31 @@ if err := sc.FromEnv(&got); err != nil {
 // got.I == 10
 ```
 
+## Environment variable prefix
+
+You can use `WithEnvPrefix` to prefix environment variable names without changing command-line flag names:
+
+``` go
+type T struct {
+  Port int `name:"port" default:"8080"`
+}
+
+os.Setenv("MYAPP_PORT", "9000")
+sc := structconfig.New[T](structconfig.WithEnvPrefix("MYAPP_"))
+var got T
+if err := sc.FromEnv(&got); err != nil {
+  panic(err)
+}
+// got.Port == 9000
+// Flag name remains "--port"
+```
+
+> **Note on `WithPrefix` vs `WithEnvPrefix`**:
+> - `WithPrefix`: adds a prefix to **struct tag names** (e.g. `WithPrefix("app_")` looks up `app_name`, `app_default`, etc.).
+> - `WithEnvPrefix`: adds a prefix to **environment variable names** (e.g. `WithEnvPrefix("MYAPP_")` looks up `MYAPP_<name>`).
+>
+> When used together, `WithPrefix` identifies the tag value for the field name, and `WithEnvPrefix` prepends to that name when resolving environment variables.
+
 ## Command-line flags ([pflag](https://github.com/spf13/pflag))
 
 ``` go

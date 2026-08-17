@@ -11,6 +11,7 @@ import (
 func EnvReceptor(
 	ptr any,
 	anyCallback func(StructField, string, func() reflect.Value) error,
+	envPrefix string,
 	logger *slog.Logger,
 ) (*PairsReceptor, error) {
 	type srcInfo struct {
@@ -25,7 +26,7 @@ func EnvReceptor(
 			// ignore the field
 			return "", ErrSkipParse
 		}
-		envVar := NewEnvVar(name)
+		envVar := NewEnvVar(envPrefix + name)
 		if v, ok := envVar.Get(); ok {
 			sources[s.Name()] = srcInfo{source: "env", envVar: string(envVar)}
 			return v, nil

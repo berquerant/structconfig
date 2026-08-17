@@ -191,3 +191,61 @@ func TestStructConfig_AdditionalTypes(t *testing.T) {
 		assert.Equal(t, 1, merged.Verbosity)
 	})
 }
+
+func TestStructConfig_WithEnvPrefix(t *testing.T) {
+	type Config struct {
+		Port int    `name:"port" default:"8080"`
+		Host string `name:"host" default:"localhost"`
+	}
+
+	envs := map[string]string{
+		"MY_APP_PORT": "9000",
+		"MY_APP_HOST": "app.local",
+		"CUSTOM_PORT": "9090",
+		"PORT":        "3000",
+	}
+	for k, v := range envs {
+		os.Setenv(k, v)
+	}
+	defer func() {
+		for k := range envs {
+			os.Unsetenv(k)
+		}
+	}()
+
+	t.Run("New with WithEnvPrefix", func(t *testing.T) {
+		sc := structconfig.New[Config](structconfig.WithEnvPrefix("MY_APP_"))
+		var got Config
+		err := sc.FromEnv(&got)
+		assert.NoError(t, err)
+		assert.Equal(t, 9000, got.Port)
+		assert.Equal(t, "app.local", got.Host)
+	})
+
+	t.Run("FromEnv with WithEnvPrefix override", func(t *testing.T) {
+		sc := structconfig.New[Config](structconfig.WithEnvPrefix("MY_APP_"))
+		var got Config
+		err := sc.FromEnv(&got, structconfig.WithEnvPrefix("CUSTOM_"))
+		assert.NoError(t, err)
+		assert.Equal(t, 9090, got.Port)
+		assert.Equal(t, "localhost", got.Host) // fallback to default
+	})
+
+	t.Run("NewConfigWithMerge with WithEnvPrefix and flags", func(t *testing.T) {
+		sc := structconfig.New[Config]()
+		merger := structconfig.NewMerger[Config]()
+		fs := pflag.NewFlagSet("test", pflag.ContinueOnError)
+
+		// Flags should use original "name" tag ("--port"), while env uses "MY_APP_PORT" and "MY_APP_HOST"
+		got, err := structconfig.NewConfigWithMerge(
+			sc,
+			merger,
+			fs,
+			structconfig.WithEnvPrefix("MY_APP_"),
+			structconfig.WithArguments([]string{"--port", "7000"}),
+		)
+		assert.NoError(t, err)
+		assert.Equal(t, 7000, got.Port)         // flag overrides env
+		assert.Equal(t, "app.local", got.Host) // from MY_APP_HOST
+	})
+}
