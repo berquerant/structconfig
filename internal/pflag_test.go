@@ -23,6 +23,9 @@ func TestPFlagReceptor(t *testing.T) {
 		S         string       `name:"fs" default:"str" usage:"STRING" short:"s"`
 		NoDefault int          `name:"fnodefault"`
 		V         CustomStruct `name:"fv" default:"def"`
+		List1     []string     `name:"flist1"`
+		List2     []string     `name:"flist2" split:"true"`
+		List3     []string     `name:"flist3" split:"true" sep:";"`
 		Ignore1   int
 		Ignore2   int `name:"-" default:"1000" usage:"IGNORE2"`
 	}
@@ -35,6 +38,9 @@ func TestPFlagReceptor(t *testing.T) {
 		"fs",
 		"fnodefault",
 		"fv",
+		"flist1",
+		"flist2",
+		"flist3",
 	}
 	sort.Strings(flagNames)
 
@@ -58,6 +64,27 @@ func TestPFlagReceptor(t *testing.T) {
 				F: 1.1,
 				S: "SHORT",
 				V: CustomStruct{Name: "def"},
+			},
+		},
+		{
+			title: "slice split and nosplit",
+			args: []string{
+				"--flist1", "a,b",
+				"--flist1", "c",
+				"--flist2", "a,b",
+				"--flist2", "c",
+				"--flist3", "a;b",
+				"--flist3", "c",
+			},
+			want: T{
+				I:     1,
+				U:     10,
+				F:     1.1,
+				S:     "str",
+				V:     CustomStruct{Name: "def"},
+				List1: []string{"a,b", "c"},
+				List2: []string{"a", "b", "c"},
+				List3: []string{"a", "b", "c"},
 			},
 		},
 		{

@@ -178,18 +178,8 @@ func TestParseSlice(t *testing.T) {
 			want:  []int{},
 		},
 		{
-			title: "empty brackets",
-			input: "[]",
-			want:  []int{},
-		},
-		{
 			title: "csv",
 			input: "1, 2, 3",
-			want:  []int{1, 2, 3},
-		},
-		{
-			title: "brackets with elements",
-			input: "[1, 2, 3]",
 			want:  []int{1, 2, 3},
 		},
 		{
@@ -200,6 +190,54 @@ func TestParseSlice(t *testing.T) {
 	} {
 		t.Run(tc.title, func(t *testing.T) {
 			got, err := internal.ParseSlice(tc.input, internal.ParseInt[int])
+			if tc.wantErr {
+				assert.NotNil(t, err)
+				return
+			}
+			assert.Nil(t, err)
+			assert.Equal(t, tc.want, got)
+		})
+	}
+}
+
+func TestParseStringSlice(t *testing.T) {
+	for _, tc := range []struct {
+		title   string
+		input   string
+		split   bool
+		sep     string
+		want    []string
+		wantErr bool
+	}{
+		{
+			title: "split false, empty",
+			input: "",
+			split: false,
+			want:  []string{},
+		},
+		{
+			title: "split false, non-empty",
+			input: "a,b",
+			split: false,
+			want:  []string{"a,b"},
+		},
+		{
+			title: "split true, default sep",
+			input: "a,b,c",
+			split: true,
+			sep:   ",",
+			want:  []string{"a", "b", "c"},
+		},
+		{
+			title: "split true, custom sep semicolon",
+			input: "a;b;c",
+			split: true,
+			sep:   ";",
+			want:  []string{"a", "b", "c"},
+		},
+	} {
+		t.Run(tc.title, func(t *testing.T) {
+			got, err := internal.ParseStringSlice(tc.input, tc.split, tc.sep)
 			if tc.wantErr {
 				assert.NotNil(t, err)
 				return

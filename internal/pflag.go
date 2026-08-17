@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"errors"
 	"log/slog"
 	"reflect"
 	"time"
@@ -60,11 +61,46 @@ func PFlagGetReceptor(
 	if err != nil {
 		return nil, err
 	}
-	return PairsSynthReceptor(
+	r := PairsSynthReceptor(
 		get,
 		PFlagGetConverter(fs),
 		typedReceptor,
-	), nil
+	)
+	r.StringSlicePair = NewParsePair(
+		func(s StructField) ([]string, error) {
+			name, err := get(s)
+			if err != nil {
+				if errors.Is(err, ErrParseAsDefault) {
+					return nil, nil
+				}
+				return nil, err
+			}
+			arr, err := fs.GetStringArray(name)
+			if err != nil {
+				return nil, err
+			}
+			if !fs.Changed(name) {
+				if _, ok := s.Tag().Default(); !ok {
+					return nil, nil
+				}
+			}
+			if !s.Tag().Split() {
+				return arr, nil
+			}
+			sep := s.Tag().Sep()
+			var res []string
+			for _, item := range arr {
+				parsed, err := ParseStringSlice(item, true, sep)
+				if err != nil {
+					return nil, err
+				}
+				res = append(res, parsed...)
+			}
+			return res, nil
+		},
+		typedReceptor.StringSlice,
+	)
+	return r, nil
 }
 
 func pflagSetFunc[T any](
@@ -138,7 +174,7 @@ func PFlagSetTypeReceptor(fs *pflag.FlagSet) *DefaultTypedReceptor {
 		UintSliceFunc:    pflagSetFunc(fs.UintSlice, fs.UintSliceP),
 		Float32SliceFunc: pflagSetFunc(fs.Float32Slice, fs.Float32SliceP),
 		Float64SliceFunc: pflagSetFunc(fs.Float64Slice, fs.Float64SliceP),
-		StringSliceFunc:  pflagSetFunc(fs.StringSlice, fs.StringSliceP),
+		StringSliceFunc:  pflagSetFunc(fs.StringArray, fs.StringArrayP),
 		DurationFunc:     pflagSetFunc(fs.Duration, fs.DurationP),
 		TimeFunc:         pflagTimeSetFunc(fs.String, fs.StringP),
 		CountFunc:        pflagCountSetFunc(fs.CountP),

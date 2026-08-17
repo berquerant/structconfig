@@ -17,6 +17,9 @@ func TestTag(t *testing.T) {
 		T5 int
 		T6 int `name:"-"`
 		T7 int `name:"t7" count:"true"`
+		T8 []string `name:"t8" split:"true" sep:";"`
+		T9 []string `name:"t9" split:"false"`
+		T10 []string `name:"t10"`
 	}
 
 	v := reflect.TypeFor[A]()
@@ -69,5 +72,20 @@ func TestTag(t *testing.T) {
 	t.Run("T7", func(t *testing.T) {
 		x := internal.NewTag(v.Field(6).Tag, "")
 		assert.True(t, x.Count())
+	})
+	t.Run("T8", func(t *testing.T) {
+		x := internal.NewTag(v.Field(7).Tag, "")
+		assert.True(t, x.Split())
+		assert.Equal(t, ";", x.Sep())
+	})
+	t.Run("T9", func(t *testing.T) {
+		x := internal.NewTag(v.Field(8).Tag, "")
+		assert.False(t, x.Split())
+		assert.Equal(t, ",", x.Sep())
+	})
+	t.Run("T10", func(t *testing.T) {
+		x := internal.NewTag(v.Field(9).Tag, "")
+		assert.False(t, x.Split())
+		assert.Equal(t, ",", x.Sep())
 	})
 }

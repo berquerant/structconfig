@@ -36,7 +36,18 @@ func SetReceptor(
 	if err != nil {
 		return nil, err
 	}
-	return PairsSynthReceptor(get, converter, typedReceptor), nil
+	r := PairsSynthReceptor(get, converter, typedReceptor)
+	r.StringSlicePair = NewParsePair(
+		func(s StructField) ([]string, error) {
+			x, err := get(s)
+			if err != nil {
+				return nil, err
+			}
+			return ParseStringSlice(x, s.Tag().Split(), s.Tag().Sep())
+		},
+		typedReceptor.StringSlice,
+	)
+	return r, nil
 }
 
 func SetTypedReceptor(
