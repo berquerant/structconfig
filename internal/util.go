@@ -57,13 +57,6 @@ func ParseTime(s string) (time.Time, error) {
 }
 
 func ParseSlice[T any](s string, elemConv func(string) (T, error)) ([]T, error) {
-	s = strings.TrimSpace(s)
-	if s == "" {
-		return []T{}, nil
-	}
-	s = strings.TrimPrefix(s, "[")
-	s = strings.TrimSuffix(s, "]")
-	s = strings.TrimSpace(s)
 	if s == "" {
 		return []T{}, nil
 	}
@@ -84,6 +77,22 @@ func ParseSlice[T any](s string, elemConv func(string) (T, error)) ([]T, error) 
 		}
 	}
 	return result, nil
+}
+
+func ParseStringSlice(s string, split bool, sep string) ([]string, error) {
+	if !split {
+		if s == "" {
+			return []string{}, nil
+		}
+		return []string{s}, nil
+	}
+	if sep == "" || sep == "," {
+		return ParseSlice(s, func(x string) (string, error) { return x, nil })
+	}
+	if s == "" {
+		return []string{}, nil
+	}
+	return strings.Split(s, sep), nil
 }
 
 func IsSupportedKind(k reflect.Kind) bool {

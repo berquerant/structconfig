@@ -114,6 +114,8 @@ User's struct T (with tags)
 | `usage:"<text>"` | Flag usage string for pflag. |
 | `short:"<char>"` | Single-character shorthand for pflag. |
 | `count:"true"` | Flag that counts the number of times it is provided (e.g. `-v`, `-vv`). |
+| `split:"true"` | Split `[]string` values with a separator (default `false`). |
+| `sep:"<char>"` | Separator string for `[]string` when `split:"true"` (default `,`). |
 
 A `prefix` option (`WithPrefix`) prepends a string to all tag key names, enabling namespaced tags.
 

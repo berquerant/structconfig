@@ -28,8 +28,8 @@ func TestEnvReceptor(t *testing.T) {
 		"EU": "10",
 		"EF": "1.1",
 		// ENO_DEFAULT is not defined
-		"ESLICE": "[1,2]",
-		"IGNORE": "[1]",
+		"ESLICE": "1,2",
+		"IGNORE": "1",
 	}
 	for k, v := range envs {
 		os.Setenv(k, v)

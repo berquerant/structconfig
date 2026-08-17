@@ -17,7 +17,7 @@ func TestDefaultReceptor(t *testing.T) {
 		F         float32 `default:"1.1"`
 		S         string  `default:"str"`
 		NoDefault int
-		Slice     []int `default:"[1,2]"`
+		Slice     []int `default:"1,2"`
 	}
 
 	want := T{

@@ -16,7 +16,7 @@ func TestMerger(t *testing.T) {
 	type T struct {
 		I      int    `name:"i" default:"1"`
 		S      string `name:"s" default:"s"`
-		II     []int  `name:"ii" default:"[1]"`
+		II     []int  `name:"ii" default:"1"`
 		Ignore int
 	}
 	defaultValue := T{

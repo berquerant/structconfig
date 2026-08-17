@@ -1,6 +1,9 @@
 package internal
 
-import "time"
+import (
+	"errors"
+	"time"
+)
 
 // FlagSetFunc defines a command-line flag.
 type FlagSetFunc[T any] func(name string, defaultValue T, usage string) error
@@ -31,7 +34,22 @@ func FlagSetReceptor(typedReceptor TypedReceptor) *PairsReceptor {
 		// tell to pass default value when default tag value is missing
 		return "", ErrParseAsDefault
 	}
-	return PairsSynthReceptor(get, NewConv(), typedReceptor)
+	r := PairsSynthReceptor(get, NewConv(), typedReceptor)
+	r.StringSlicePair = NewParsePair(
+		func(s StructField) ([]string, error) {
+			x, err := get(s)
+			switch {
+			case err == nil:
+				return ParseStringSlice(x, s.Tag().Split(), s.Tag().Sep())
+			case errors.Is(err, ErrParseAsDefault):
+				return nil, nil
+			default:
+				return nil, err
+			}
+		},
+		typedReceptor.StringSlice,
+	)
+	return r
 }
 
 func FlagSetTypedReceptor(

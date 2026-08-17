@@ -11,6 +11,8 @@ const (
 	TagDefault = "default"
 	TagShort   = "short"
 	TagCount   = "count"
+	TagSplit   = "split"
+	TagSep     = "sep"
 
 	TagNameIgnored = "-"
 )
@@ -56,6 +58,21 @@ func (t Tag) Count() bool {
 		return false
 	}
 	return v == "true" || v == ""
+}
+
+func (t Tag) Split() bool {
+	v, ok := t.tag.Lookup(t.prefix + TagSplit)
+	if !ok {
+		return false
+	}
+	return v == "true" || v == ""
+}
+
+func (t Tag) Sep() string {
+	if v, ok := t.tag.Lookup(t.prefix + TagSep); ok {
+		return v
+	}
+	return ","
 }
 
 func (t Tag) String() string {
