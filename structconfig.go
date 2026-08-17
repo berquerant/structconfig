@@ -47,13 +47,14 @@ type (
 func IsSupportedKind(k reflect.Kind) bool         { return internal.IsSupportedKind(k) }
 func NewType(v any, prefix string) (*Type, error) { return internal.NewType(v, prefix) }
 
-//go:generate go tool goconfig -configOption Option -option -output structconfig_config_generated.go -field "AnyCallback AnyCallbackFunc|AnyEqual AnyEqualFunc|Prefix string|Arguments []string|Logger *slog.Logger"
+//go:generate go tool goconfig -configOption Option -option -output structconfig_config_generated.go -field "AnyCallback AnyCallbackFunc|AnyEqual AnyEqualFunc|Prefix string|EnvPrefix string|Arguments []string|Logger *slog.Logger"
 
 func newDefaultConfigBuilder() *ConfigBuilder {
 	return NewConfigBuilder().
 		AnyCallback(nil).
 		AnyEqual(nil).
 		Prefix("").
+		EnvPrefix("").
 		Arguments(nil).
 		Logger(nil)
 }
@@ -93,6 +94,7 @@ func (m *Merger[T]) Merge(left, right T) (T, error) {
 //
 // AnyCallback parses "default" tag value and set it.
 // Prefix adds a prefix to "name", "short", "default" and "usage" tag name.
+// EnvPrefix adds a prefix to environment variable names.
 // Logger enables structured logging of config population.
 func New[T any](opt ...Option) *StructConfig[T] {
 	c := newDefaultConfigBuilder().Build()
@@ -101,6 +103,7 @@ func New[T any](opt ...Option) *StructConfig[T] {
 	return &StructConfig[T]{
 		anyCallback: c.AnyCallback.Get(),
 		prefix:      c.Prefix.Get(),
+		envPrefix:   c.EnvPrefix.Get(),
 		logger:      c.Logger.Get(),
 	}
 }
@@ -108,6 +111,7 @@ func New[T any](opt ...Option) *StructConfig[T] {
 type StructConfig[T any] struct {
 	anyCallback AnyCallbackFunc
 	prefix      string
+	envPrefix   string
 	logger      *slog.Logger
 }
 
@@ -137,11 +141,18 @@ func (sc StructConfig[T]) FromDefault(v *T) error {
 //
 // Environment variable name will be
 //
-//	NewEnvVar("name tag value").String()
+//	NewEnvVar(envPrefix + "name tag value").String()
 //
-// All '.' and '-' will be replaced with '_', making it all uppsercase.
-func (sc StructConfig[T]) FromEnv(v *T) error {
-	r, err := internal.EnvReceptor(v, sc.anyCallback, sc.logger)
+// All '.' and '-' will be replaced with '_', making it all uppercase.
+func (sc StructConfig[T]) FromEnv(v *T, opt ...Option) error {
+	c := newDefaultConfigBuilder().
+		EnvPrefix(sc.envPrefix).
+		AnyCallback(sc.anyCallback).
+		Logger(sc.logger).
+		Build()
+	c.Apply(opt...)
+
+	r, err := internal.EnvReceptor(v, c.AnyCallback.Get(), c.EnvPrefix.Get(), c.Logger.Get())
 	if err != nil {
 		return err
 	}

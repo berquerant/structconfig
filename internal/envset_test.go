@@ -61,6 +61,7 @@ func TestEnvReceptor(t *testing.T) {
 			fv().Set(reflect.ValueOf(xs))
 			return nil
 		},
+		"",
 		nil,
 	)
 
@@ -71,4 +72,40 @@ func TestEnvReceptor(t *testing.T) {
 
 	assert.Nil(t, typ.Accept(r))
 	assert.Equal(t, want, got)
+}
+
+func TestEnvReceptor_WithPrefix(t *testing.T) {
+	type T struct {
+		Port int    `name:"port"`
+		Host string `name:"host" default:"localhost"`
+	}
+
+	envs := map[string]string{
+		"MY_APP_PORT": "8080",
+		"PORT":        "3000",
+	}
+	for k, v := range envs {
+		os.Setenv(k, v)
+	}
+	defer func() {
+		for k := range envs {
+			os.Unsetenv(k)
+		}
+	}()
+
+	var got T
+	r, err := internal.EnvReceptor(
+		&got,
+		nil,
+		"my_app_",
+		nil,
+	)
+	assert.Nil(t, err)
+
+	typ, err := internal.NewType(got, "")
+	assert.Nil(t, err)
+
+	assert.Nil(t, typ.Accept(r))
+	assert.Equal(t, 8080, got.Port)
+	assert.Equal(t, "localhost", got.Host)
 }

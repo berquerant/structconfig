@@ -230,3 +230,110 @@ func Example_stringSliceSplitAndSep() {
 	// Env: Raw=[x,y], Csv=[x y], Custom=[x y]
 	// Flags: Raw=[1,2 3], Csv=[1 2 3], Custom=[1 2 3]
 }
+
+func ExampleWithEnvPrefix() {
+	// WithEnvPrefix adds a prefix only to environment variable names,
+	// keeping command-line flag names unchanged.
+	type Config struct {
+		Host string `name:"host" default:"localhost"`
+		Port int    `name:"port" default:"8080"`
+	}
+
+	envs := map[string]string{
+		"MYAPP_HOST": "127.0.0.1",
+		"MYAPP_PORT": "3000",
+		"HOST":       "otherhost", // ignored because of prefix
+	}
+	for k, v := range envs {
+		os.Setenv(k, v)
+	}
+	defer func() {
+		for k := range envs {
+			os.Unsetenv(k)
+		}
+	}()
+
+	// 1. Specify WithEnvPrefix when creating StructConfig
+	sc := structconfig.New[Config](structconfig.WithEnvPrefix("MYAPP_"))
+	var got Config
+	if err := sc.FromEnv(&got); err != nil {
+		panic(err)
+	}
+	fmt.Printf("Env: Host=%s, Port=%d\n", got.Host, got.Port)
+
+	// 2. Command-line flags still use original name tag without prefix ("--host", "--port")
+	fs := pflag.NewFlagSet("example", pflag.ContinueOnError)
+	if err := sc.SetFlags(fs); err != nil {
+		panic(err)
+	}
+	if err := fs.Parse([]string{"--port", "9000"}); err != nil {
+		panic(err)
+	}
+	var fromFlags Config
+	if err := sc.FromFlags(&fromFlags, fs); err != nil {
+		panic(err)
+	}
+	fmt.Printf("Flags: Host=%s, Port=%d\n", fromFlags.Host, fromFlags.Port)
+
+	// Output:
+	// Env: Host=127.0.0.1, Port=3000
+	// Flags: Host=localhost, Port=9000
+}
+
+func Example_prefixVsEnvPrefix() {
+	// WithPrefix: specifies a prefix for struct tag keys (e.g. tag "app_name" instead of "name").
+	// WithEnvPrefix: specifies a prefix for environment variable names (e.g. "MYAPP_PORT" instead of "PORT").
+	//
+	// When used together:
+	// - StructConfig looks up the tag with prefix: `app_name:"port"` -> tag name is "port"
+	// - Flag name uses the tag name: "--port"
+	// - Environment variable name prepends WithEnvPrefix: "MYAPP_PORT"
+	type Config struct {
+		Port int    `app_name:"port" app_default:"8080"`
+		Host string `app_name:"host" app_default:"localhost"`
+	}
+
+	envs := map[string]string{
+		"MYAPP_PORT": "9000",
+		"MYAPP_HOST": "127.0.0.1",
+		"PORT":       "3000", // ignored (missing MYAPP_ prefix)
+	}
+	for k, v := range envs {
+		os.Setenv(k, v)
+	}
+	defer func() {
+		for k := range envs {
+			os.Unsetenv(k)
+		}
+	}()
+
+	sc := structconfig.New[Config](
+		structconfig.WithPrefix("app_"),      // reads `app_name` and `app_default` tags
+		structconfig.WithEnvPrefix("MYAPP_"), // reads `MYAPP_<name>` env vars
+	)
+
+	// 1. FromEnv reads MYAPP_PORT and MYAPP_HOST
+	var fromEnv Config
+	if err := sc.FromEnv(&fromEnv); err != nil {
+		panic(err)
+	}
+	fmt.Printf("Env: Host=%s, Port=%d\n", fromEnv.Host, fromEnv.Port)
+
+	// 2. Flags are registered with the tag name "--port", "--host" (unaffected by WithEnvPrefix)
+	fs := pflag.NewFlagSet("example", pflag.ContinueOnError)
+	if err := sc.SetFlags(fs); err != nil {
+		panic(err)
+	}
+	if err := fs.Parse([]string{"--port", "7070"}); err != nil {
+		panic(err)
+	}
+	var fromFlags Config
+	if err := sc.FromFlags(&fromFlags, fs); err != nil {
+		panic(err)
+	}
+	fmt.Printf("Flags: Host=%s, Port=%d\n", fromFlags.Host, fromFlags.Port)
+
+	// Output:
+	// Env: Host=127.0.0.1, Port=9000
+	// Flags: Host=localhost, Port=7070
+}

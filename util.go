@@ -28,7 +28,7 @@ func NewConfigWithMerge[T any](
 	return NewBuilder(sc, merger).
 		Add(func(sc *StructConfig[T]) (*T, error) {
 			var t T
-			if err := sc.FromEnv(&t); err != nil {
+			if err := sc.FromEnv(&t, opt...); err != nil {
 				return nil, err
 			}
 			return &t, nil
