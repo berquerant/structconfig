@@ -3,7 +3,7 @@ module github.com/berquerant/structconfig
 go 1.27.3
 
 require (
-	github.com/spf13/pflag v1.0.10
+	github.com/spf13/pflag v1.1.0
 	github.com/stretchr/testify v1.12.1
 	golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f
 )
